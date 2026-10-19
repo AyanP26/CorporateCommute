@@ -37,26 +37,6 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "2FE3199D245BA10CDEA30051"
-               BuildableName = "CorporateCommuteTests.xctest"
-               BlueprintName = "CorporateCommuteTests"
-               ReferencedContainer = "container:CorporateCommute.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DB863A6018F5B6444659FEB3"
-               BuildableName = "CorporateCommuteUITests.xctest"
-               BlueprintName = "CorporateCommuteUITests"
-               ReferencedContainer = "container:CorporateCommute.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

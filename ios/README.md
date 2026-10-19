@@ -10,7 +10,6 @@ A native iOS application for **Corporate Commute** built with SwiftUI, following
 - **Account Creation**: Full registration flow with validated inputs for Name, Email, Password, and Phone Number.
 - **Authentication**: Sign-in and session state management via `AuthViewModel`.
 - **Commuter Dashboard**: Post-login view ready for rideshare schedules, vehicle pooling, and company routes.
-- **Automated Tests**: Unit test suite (`CorporateCommuteTests`) and UI test suite (`CorporateCommuteUITests`) verifying flows end-to-end.
 
 ---
 
@@ -43,10 +42,6 @@ ios/
 │   │   ├── Assets.xcassets/           # App icons, accent colors, and asset catalogs
 │   │   └── Preview Content/           # SwiftUI canvas preview assets
 │   └── Info.plist                     # Target configuration and capabilities
-├── CorporateCommuteTests/             # Unit tests
-│   └── CorporateCommuteTests.swift
-├── CorporateCommuteUITests/           # UI automation tests
-│   └── CorporateCommuteUITests.swift
 ├── .gitignore                         # Xcode & iOS specific ignore rules
 └── README.md                          # Documentation
 ```
@@ -65,7 +60,7 @@ Double-click `CorporateCommute.xcodeproj` located inside the `ios/` folder or op
 open ios/CorporateCommute.xcodeproj
 ```
 
-Select an iOS Simulator (e.g., iPhone 15/16) and click **Run** (`⌘R`).
+Select your connected device (e.g. your iPhone) or an iOS Simulator, and click **Run** (`⌘R`).
 
 ### Building from Command Line
 ```bash
@@ -73,14 +68,6 @@ xcodebuild -project ios/CorporateCommute.xcodeproj \
            -scheme CorporateCommute \
            -destination 'generic/platform=iOS Simulator' \
            build CODE_SIGNING_ALLOWED=NO
-```
-
-### Running Tests
-```bash
-xcodebuild -project ios/CorporateCommute.xcodeproj \
-           -scheme CorporateCommute \
-           -destination 'platform=iOS Simulator,name=iPhone 16' \
-           test CODE_SIGNING_ALLOWED=NO
 ```
 
 ---
@@ -93,4 +80,4 @@ xcodebuild -project ios/CorporateCommute.xcodeproj \
 | Primary Button Color | `#3E003B` | `AppTheme.buttonPurple` |
 | Button Height & Radius | `56dp`, `28dp` corners | `PrimaryButton` (56pt, cornerRadius 28) |
 | Input Fields | `bg_input_field` (white 12% fill) | `CustomTextField` (white 12% fill, 16pt corners) |
-| App Identifier | `com.example.corporatecommute` | `com.example.corporatecommute` |
+| App Identifier | `com.example.corporatecommute` | `com.ikshaankaul.corporatecommute` |

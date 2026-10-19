@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		055E22679E97176A036CB292 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51F7F8DA7C46D6E9CAA98D2 /* LoginView.swift */; };
 		2BFE2CB0688EAA319043231F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CB9C4CE473834B35CFEDCF /* User.swift */; };
-		414A12598D19F719DE8C619A /* CorporateCommuteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A37854ED5E59EF5768EB07 /* CorporateCommuteTests.swift */; };
 		41847C40BD1CD4B1F172CF15 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFD21E85F8E844732D964CDA /* Assets.xcassets */; };
 		5B9E3882EA26CE83C9733AD5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */; };
 		6B2C1A58DF1243A00169BE17 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80CB0DF149FAADE1109B678 /* HomeView.swift */; };
@@ -23,7 +22,6 @@
 		E0C6A8A2309C007389D0E548 /* BackgroundGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C2D5ECF4DE4D62A2C19878 /* BackgroundGradient.swift */; };
 		E44ABE86DDA376C52D78C80E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A910B5EE0725E8CE3EE7C /* AppTheme.swift */; };
 		E74FF0EA9E0D26380701512F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */; };
-		F6F399131124A03E401A4781 /* CorporateCommuteUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5840F71A5B12E9C15D6E4B56 /* CorporateCommuteUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,10 +44,8 @@
 /* Begin PBXFileReference section */
 		09CB9C4CE473834B35CFEDCF /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		4559D72E9F8C88005CB51C78 /* AuthViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
-		5840F71A5B12E9C15D6E4B56 /* CorporateCommuteUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CorporateCommuteUITests.swift; sourceTree = "<group>"; };
 		58852CA3D1FF110ADC83497C /* CreateAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		65C9B15544F7BC8922326E8F /* CustomTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
-		83A37854ED5E59EF5768EB07 /* CorporateCommuteTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CorporateCommuteTests.swift; sourceTree = "<group>"; };
 		8D833991E708144C5351C1C2 /* CorporateCommuteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorporateCommuteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9673555AADA389090BA2A3D2 /* CorporateCommuteApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CorporateCommuteApp.swift; sourceTree = "<group>"; };
 		A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -71,22 +67,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				DC16E073607D02E88C6DA1DB /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B8C5A1CD26D0524C20D6E5B2 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				E74FF0EA9E0D26380701512F /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C23DF66B823ED0523CBF6F19 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				5B9E3882EA26CE83C9733AD5 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,8 +96,6 @@
 				75EB02D5494FE993CD45CDFF /* Products */,
 				D3345CEFA17EC153C02D96DF /* Frameworks */,
 				C6AE8A809ECCBB4EFC8C77C8 /* CorporateCommute */,
-				E78F686EFAC80C45149C6F82 /* CorporateCommuteTests */,
-				F2E166D5F74D19F420B7AC0B /* CorporateCommuteUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -221,24 +199,6 @@
 			path = App;
 			sourceTree = "<group>";
 		};
-		E78F686EFAC80C45149C6F82 /* CorporateCommuteTests */ = {
-			isa = PBXGroup;
-			children = (
-				83A37854ED5E59EF5768EB07 /* CorporateCommuteTests.swift */,
-			);
-			name = CorporateCommuteTests;
-			path = CorporateCommuteTests;
-			sourceTree = "<group>";
-		};
-		F2E166D5F74D19F420B7AC0B /* CorporateCommuteUITests */ = {
-			isa = PBXGroup;
-			children = (
-				5840F71A5B12E9C15D6E4B56 /* CorporateCommuteUITests.swift */,
-			);
-			name = CorporateCommuteUITests;
-			path = CorporateCommuteUITests;
-			sourceTree = "<group>";
-		};
 		F7177E79C03B1CD259E6AB91 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
@@ -253,24 +213,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		2FE3199D245BA10CDEA30051 /* CorporateCommuteTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = F5E8D24261EAFD4D78C273F6 /* Build configuration list for PBXNativeTarget "CorporateCommuteTests" */;
-			buildPhases = (
-				CE730449C39CC8857E245681 /* Sources */,
-				B8C5A1CD26D0524C20D6E5B2 /* Frameworks */,
-				C96732F90D3777E663B9F7E5 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				A103ED7E8AF69A0C5E324B6F /* PBXTargetDependency */,
-			);
-			name = CorporateCommuteTests;
-			productName = CorporateCommuteTests;
-			productReference = F545C33A230BAEE498E10B41 /* CorporateCommuteTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		41EAAE3B4CC357B85DA3CBB0 /* CorporateCommute */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1BE6B5610E7DDEA16A85DE5 /* Build configuration list for PBXNativeTarget "CorporateCommute" */;
@@ -287,24 +229,6 @@
 			productName = CorporateCommute;
 			productReference = AB3BC1B661CC3ED529548A4B /* CorporateCommute.app */;
 			productType = "com.apple.product-type.application";
-		};
-		DB863A6018F5B6444659FEB3 /* CorporateCommuteUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 93BC1F014EF4398522B4081B /* Build configuration list for PBXNativeTarget "CorporateCommuteUITests" */;
-			buildPhases = (
-				38087C0425E556AD363BA988 /* Sources */,
-				C23DF66B823ED0523CBF6F19 /* Frameworks */,
-				8AF70AFA274D0E23D60BB9CC /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				79C1C4F671C44C7C91E1F026 /* PBXTargetDependency */,
-			);
-			name = CorporateCommuteUITests;
-			productName = CorporateCommuteUITests;
-			productReference = 8D833991E708144C5351C1C2 /* CorporateCommuteUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -331,20 +255,11 @@
 			projectRoot = "";
 			targets = (
 				41EAAE3B4CC357B85DA3CBB0 /* CorporateCommute */,
-				2FE3199D245BA10CDEA30051 /* CorporateCommuteTests */,
-				DB863A6018F5B6444659FEB3 /* CorporateCommuteUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		8AF70AFA274D0E23D60BB9CC /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		B1934269813300A12F39AAE3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -353,32 +268,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C96732F90D3777E663B9F7E5 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		38087C0425E556AD363BA988 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				F6F399131124A03E401A4781 /* CorporateCommuteUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CE730449C39CC8857E245681 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				414A12598D19F719DE8C619A /* CorporateCommuteTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E935F2683A383F458BD41E15 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -398,21 +290,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		79C1C4F671C44C7C91E1F026 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CorporateCommute;
-			target = 41EAAE3B4CC357B85DA3CBB0 /* CorporateCommute */;
-			targetProxy = CC754EC04610A2607059539D /* PBXContainerItemProxy */;
-		};
-		A103ED7E8AF69A0C5E324B6F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CorporateCommute;
-			target = 41EAAE3B4CC357B85DA3CBB0 /* CorporateCommute */;
-			targetProxy = 349D5AC104B2ED5EFC73015A /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0105AB478AE24AE1ABB19169 /* Release */ = {
@@ -663,29 +540,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		93BC1F014EF4398522B4081B /* Build configuration list for PBXNativeTarget "CorporateCommuteUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				55962B377C74B6DECFF7A36C /* Release */,
-				99D65257AF3E11F231767412 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		A1BE6B5610E7DDEA16A85DE5 /* Build configuration list for PBXNativeTarget "CorporateCommute" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0105AB478AE24AE1ABB19169 /* Release */,
 				8E8CC1A5D461F9209FB6FC94 /* Debug */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		F5E8D24261EAFD4D78C273F6 /* Build configuration list for PBXNativeTarget "CorporateCommuteTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9F279337741E9CA8EA907467 /* Release */,
-				770B8407FEC505BB1DDE0C5A /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
