@@ -32,7 +32,8 @@ final class AuthViewModel: ObservableObject {
         isSubmitting = true
         errorMessage = nil
 
-        // Simulate network delay / registration
+        // In-memory UI simulation only. No accounts or passwords are saved to disk/device.
+        // Backend API will handle user registration and persistence in the future.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             self.isSubmitting = false
@@ -41,6 +42,7 @@ final class AuthViewModel: ObservableObject {
                 email: self.email.trimmingCharacters(in: .whitespaces).lowercased(),
                 phoneNumber: self.phoneNumber.trimmingCharacters(in: .whitespaces)
             )
+            self.password = "" // Do not retain password in memory
             self.currentUser = newUser
             self.isAuthenticated = true
         }
@@ -55,9 +57,11 @@ final class AuthViewModel: ObservableObject {
         isSubmitting = true
         errorMessage = nil
 
+        // In-memory UI simulation only. Backend API will handle authentication.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
             self.isSubmitting = false
+            self.password = "" // Do not retain password in memory
             self.currentUser = User(
                 name: "Commuter",
                 email: self.email.lowercased(),
