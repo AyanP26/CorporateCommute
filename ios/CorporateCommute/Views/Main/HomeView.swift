@@ -27,17 +27,19 @@ struct HomeView: View {
 
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Your Commute Dashboard")
-                            .font(.headline)
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
 
                         Text("You're all set up with Corporate Commute. Rideshare schedules, vehicle pooling, and company routes will appear here.")
-                            .font(.subheadline)
+                            .font(.system(size: 14, weight: .regular))
                             .foregroundColor(AppTheme.placeholderText)
                     }
-                    .padding(20)
-                    .frame(maxWidth: .infinity)
-                    .background(AppTheme.inputBackground)
-                    .cornerRadius(AppTheme.inputCornerRadius)
+                    .padding(24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(AppTheme.inputBackground)
+                    )
 
                     Spacer()
 

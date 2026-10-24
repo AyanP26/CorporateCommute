@@ -22,16 +22,12 @@ struct CustomTextField: View {
         }
         .multilineTextAlignment(.center)
         .foregroundColor(AppTheme.textLight)
-        .font(.system(size: 16))
-        .padding(.horizontal, 20)
+        .font(.system(size: 16, weight: .regular))
+        .padding(.horizontal, 24)
         .frame(height: AppTheme.buttonHeight)
         .background(
-            RoundedRectangle(cornerRadius: AppTheme.inputCornerRadius)
+            RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
                 .fill(AppTheme.inputBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppTheme.inputCornerRadius)
-                        .stroke(AppTheme.inputBorder, lineWidth: 1)
-                )
         )
     }
 }

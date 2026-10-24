@@ -11,26 +11,23 @@ struct WelcomeView: View {
                 BackgroundGradient()
 
                 VStack(spacing: 0) {
-                    Spacer(minLength: 40)
+                    Spacer()
 
-                    // Car Illustration matching Android's ivCar
-                    Image(systemName: "car.side.fill")
+                    // Car Illustration matching Android's ic_car_illustration
+                    Image("CarIllustration")
                         .resizable()
                         .scaledToFit()
-                        .foregroundColor(AppTheme.textLight)
-                        .frame(width: 140, height: 90)
-                        .padding(.bottom, 24)
+                        .frame(width: 180, height: 120)
 
                     // Title matching Android's welcome_title
                     Text("Welcome to Corporate\nCommute!")
-                        .font(.system(size: 30, weight: .bold))
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundColor(AppTheme.textLight)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
+                        .padding(.top, 32)
 
-                    Spacer(minLength: 40)
-
-                    // Buttons
+                    // Buttons matching Android's packed layout
                     VStack(spacing: 16) {
                         PrimaryButton(title: "Login") {
                             navigateToLogin = true
@@ -40,7 +37,10 @@ struct WelcomeView: View {
                             navigateToCreateAccount = true
                         }
                     }
-                    .padding(.bottom, 48)
+                    .padding(.top, 48)
+
+                    Spacer()
+                    Spacer()
                 }
                 .padding(.horizontal, AppTheme.horizontalPadding)
             }
