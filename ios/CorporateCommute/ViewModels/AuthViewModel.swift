@@ -12,6 +12,22 @@ final class AuthViewModel: ObservableObject {
     @Published var errorMessage: String? = nil
     @Published var isSubmitting: Bool = false
 
+    private let authService: AuthServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
+
+    init(authService: AuthServiceProtocol = FirebaseManager.shared.authService) {
+        self.authService = authService
+
+        // Subscribe to auth service user state
+        authService.currentUserPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] user in
+                self?.currentUser = user
+                self?.isAuthenticated = (user != nil)
+            }
+            .store(in: &cancellables)
+    }
+
     var isRegistrationValid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
         email.contains("@") &&
@@ -32,19 +48,27 @@ final class AuthViewModel: ObservableObject {
         isSubmitting = true
         errorMessage = nil
 
-        // In-memory UI simulation only. No accounts or passwords are saved to disk/device.
-        // Backend API will handle user registration and persistence in the future.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.isSubmitting = false
-            let newUser = User(
-                name: self.name.trimmingCharacters(in: .whitespaces),
-                email: self.email.trimmingCharacters(in: .whitespaces).lowercased(),
-                phoneNumber: self.phoneNumber.trimmingCharacters(in: .whitespaces)
-            )
-            self.password = "" // Do not retain password in memory
-            self.currentUser = newUser
-            self.isAuthenticated = true
+        let regName = name.trimmingCharacters(in: .whitespaces)
+        let regEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
+        let regPassword = password
+        let regPhone = phoneNumber.trimmingCharacters(in: .whitespaces)
+
+        Task { @MainActor in
+            do {
+                let user = try await authService.register(
+                    name: regName,
+                    email: regEmail,
+                    password: regPassword,
+                    phoneNumber: regPhone
+                )
+                self.isSubmitting = false
+                self.password = "" // Purge password from memory
+                self.currentUser = user
+                self.isAuthenticated = true
+            } catch {
+                self.isSubmitting = false
+                self.errorMessage = error.localizedDescription
+            }
         }
     }
 
@@ -57,21 +81,32 @@ final class AuthViewModel: ObservableObject {
         isSubmitting = true
         errorMessage = nil
 
-        // In-memory UI simulation only. Backend API will handle authentication.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.isSubmitting = false
-            self.password = "" // Do not retain password in memory
-            self.currentUser = User(
-                name: "Commuter",
-                email: self.email.lowercased(),
-                phoneNumber: ""
-            )
-            self.isAuthenticated = true
+        let loginEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
+        let loginPassword = password
+
+        Task { @MainActor in
+            do {
+                let user = try await authService.login(
+                    email: loginEmail,
+                    password: loginPassword
+                )
+                self.isSubmitting = false
+                self.password = "" // Purge password from memory
+                self.currentUser = user
+                self.isAuthenticated = true
+            } catch {
+                self.isSubmitting = false
+                self.errorMessage = error.localizedDescription
+            }
         }
     }
 
     func logout() {
+        do {
+            try authService.logout()
+        } catch {
+            print("[AuthViewModel] Logout error: \(error.localizedDescription)")
+        }
         currentUser = nil
         isAuthenticated = false
         name = ""
