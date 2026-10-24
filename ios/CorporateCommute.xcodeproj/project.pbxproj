@@ -10,40 +10,25 @@
 		055E22679E97176A036CB292 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51F7F8DA7C46D6E9CAA98D2 /* LoginView.swift */; };
 		2BFE2CB0688EAA319043231F /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09CB9C4CE473834B35CFEDCF /* User.swift */; };
 		41847C40BD1CD4B1F172CF15 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFD21E85F8E844732D964CDA /* Assets.xcassets */; };
-		5B9E3882EA26CE83C9733AD5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */; };
+		429C8D2BCA63391E8658FDF6 /* RideCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45CD9DC83037B3CE0A4AF85D /* RideCardView.swift */; };
+		5B4D1C68B33B2FC358DB2946 /* CommuteDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE3FB1DFD0BC79B3A7B093E /* CommuteDashboardViewModel.swift */; };
 		6B2C1A58DF1243A00169BE17 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A80CB0DF149FAADE1109B678 /* HomeView.swift */; };
 		90A4A2BB3D63F74F3CEE7A53 /* PrimaryButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7FE9969BE53F7B6050CCE6 /* PrimaryButton.swift */; };
 		94ED672E2D4B049F05CCB4AB /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B79F2916A81FD1057FA3874D /* WelcomeView.swift */; };
 		AA05CA241F62FAF9D7585C91 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4559D72E9F8C88005CB51C78 /* AuthViewModel.swift */; };
 		B8C78F0B9573D95DF0B1B75F /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58852CA3D1FF110ADC83497C /* CreateAccountView.swift */; };
+		B916C1C7C04EA708FA6720EF /* CommuteRide.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */; };
 		C0DCFB4748DF4A77EAF8A1B2 /* CorporateCommuteApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9673555AADA389090BA2A3D2 /* CorporateCommuteApp.swift */; };
 		C98BAC4091C189024F34256E /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65C9B15544F7BC8922326E8F /* CustomTextField.swift */; };
 		DC16E073607D02E88C6DA1DB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */; };
 		E0C6A8A2309C007389D0E548 /* BackgroundGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5C2D5ECF4DE4D62A2C19878 /* BackgroundGradient.swift */; };
 		E44ABE86DDA376C52D78C80E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = C61A910B5EE0725E8CE3EE7C /* AppTheme.swift */; };
-		E74FF0EA9E0D26380701512F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2DB04E3A0C7A066CC0980F3 /* Foundation.framework */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		349D5AC104B2ED5EFC73015A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 48357F36D755A224C74A7D9A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 41EAAE3B4CC357B85DA3CBB0;
-			remoteInfo = CorporateCommute;
-		};
-		CC754EC04610A2607059539D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 48357F36D755A224C74A7D9A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 41EAAE3B4CC357B85DA3CBB0;
-			remoteInfo = CorporateCommute;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		09CB9C4CE473834B35CFEDCF /* User.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		4559D72E9F8C88005CB51C78 /* AuthViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		45CD9DC83037B3CE0A4AF85D /* RideCardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideCardView.swift; sourceTree = "<group>"; };
 		58852CA3D1FF110ADC83497C /* CreateAccountView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		65C9B15544F7BC8922326E8F /* CustomTextField.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
 		8D833991E708144C5351C1C2 /* CorporateCommuteUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorporateCommuteUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,6 +44,8 @@
 		EC7FE9969BE53F7B6050CCE6 /* PrimaryButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PrimaryButton.swift; sourceTree = "<group>"; };
 		EFD21E85F8E844732D964CDA /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F545C33A230BAEE498E10B41 /* CorporateCommuteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorporateCommuteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommuteRide.swift; sourceTree = "<group>"; };
+		FAE3FB1DFD0BC79B3A7B093E /* CommuteDashboardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommuteDashboardViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,6 +103,7 @@
 				B5C2D5ECF4DE4D62A2C19878 /* BackgroundGradient.swift */,
 				65C9B15544F7BC8922326E8F /* CustomTextField.swift */,
 				EC7FE9969BE53F7B6050CCE6 /* PrimaryButton.swift */,
+				45CD9DC83037B3CE0A4AF85D /* RideCardView.swift */,
 			);
 			name = Components;
 			path = Components;
@@ -134,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				4559D72E9F8C88005CB51C78 /* AuthViewModel.swift */,
+				FAE3FB1DFD0BC79B3A7B093E /* CommuteDashboardViewModel.swift */,
 			);
 			name = ViewModels;
 			path = ViewModels;
@@ -177,6 +166,7 @@
 			isa = PBXGroup;
 			children = (
 				09CB9C4CE473834B35CFEDCF /* User.swift */,
+				F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */,
 			);
 			name = Models;
 			path = Models;
@@ -286,6 +276,9 @@
 				C98BAC4091C189024F34256E /* CustomTextField.swift in Sources */,
 				90A4A2BB3D63F74F3CEE7A53 /* PrimaryButton.swift in Sources */,
 				6B2C1A58DF1243A00169BE17 /* HomeView.swift in Sources */,
+				B916C1C7C04EA708FA6720EF /* CommuteRide.swift in Sources */,
+				5B4D1C68B33B2FC358DB2946 /* CommuteDashboardViewModel.swift in Sources */,
+				429C8D2BCA63391E8658FDF6 /* RideCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -436,40 +429,6 @@
 			};
 			name = Debug;
 		};
-		55962B377C74B6DECFF7A36C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.corporatecommuteUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CorporateCommute;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		770B8407FEC505BB1DDE0C5A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.corporatecommuteTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CorporateCommute.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CorporateCommute";
-			};
-			name = Debug;
-		};
 		8E8CC1A5D461F9209FB6FC94 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -493,40 +452,6 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
-		};
-		99D65257AF3E11F231767412 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.corporatecommuteUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CorporateCommute;
-			};
-			name = Debug;
-		};
-		9F279337741E9CA8EA907467 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.example.corporatecommuteTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CorporateCommute.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CorporateCommute";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
