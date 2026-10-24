@@ -6,6 +6,7 @@ struct CustomTextField: View {
     var isSecure: Bool = false
     var keyboardType: UIKeyboardType = .default
     var textContentType: UITextContentType? = nil
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         Group {
@@ -20,6 +21,8 @@ struct CustomTextField: View {
                     .disableAutocorrection(keyboardType == .emailAddress)
             }
         }
+        .focused($isFocused)
+        .tint(.white) // Bright white vertical typing cursor (caret)
         .multilineTextAlignment(.center)
         .foregroundColor(AppTheme.textLight)
         .font(.system(size: 16, weight: .regular))
@@ -28,7 +31,12 @@ struct CustomTextField: View {
         .background(
             RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
                 .fill(AppTheme.inputBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                        .stroke(isFocused ? Color.white.opacity(0.4) : Color.white.opacity(0.08), lineWidth: isFocused ? 1.5 : 1)
+                )
         )
+        .animation(.easeInOut(duration: 0.15), value: isFocused)
     }
 }
 

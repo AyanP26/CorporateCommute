@@ -401,6 +401,7 @@ struct HomeView: View {
                     .foregroundColor(AppTheme.placeholderText)
 
                 TextField("", text: $dashboardVM.searchQuery, prompt: Text("Search routes, coworkers, departments...").foregroundColor(AppTheme.placeholderText))
+                    .tint(.white)
                     .foregroundColor(AppTheme.textLight)
                     .font(.system(size: 14))
 
