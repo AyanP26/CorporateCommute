@@ -2,8 +2,6 @@ package com.example.corporatecommute;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,19 +47,22 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setEnabled(false);
         btnLogin.setText(R.string.logging_in);
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            User user = authViewModel.login(email, password);
-            if (user != null) {
+        authViewModel.login(email, password, new AuthViewModel.AuthCallback() {
+            @Override
+            public void onSuccess(User user) {
                 Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 finish();
-            } else {
+            }
+
+            @Override
+            public void onError(String errorMessage) {
                 btnLogin.setEnabled(true);
                 btnLogin.setText(R.string.login_button);
-                tvError.setText(R.string.error_login);
+                tvError.setText(errorMessage);
                 tvError.setVisibility(View.VISIBLE);
             }
-        }, 500);
+        });
     }
 }

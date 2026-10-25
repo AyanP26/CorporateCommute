@@ -1,16 +1,18 @@
 package com.example.corporatecommute.models;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 public class User implements Serializable {
-    private final String id;
+    private String id;
     private String name;
     private String email;
     private String phoneNumber;
 
-    public User(String name, String email, String phoneNumber) {
-        this.id = UUID.randomUUID().toString();
+    // No-argument constructor required for Firestore serialization
+    public User() {}
+
+    public User(String id, String name, String email, String phoneNumber) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
@@ -18,6 +20,10 @@ public class User implements Serializable {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

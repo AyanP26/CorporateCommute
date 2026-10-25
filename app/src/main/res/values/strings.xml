@@ -2,6 +2,8 @@
     <string name="app_name">Corporate Commute</string>
     <string name="welcome_title">Welcome to Corporate\nCommute!</string>
     <string name="welcome_back">Welcome Back</string>
+    <string name="welcome_user_format">Welcome, %1$s!</string>
+    <string name="welcome_default">Welcome, Commuter!</string>
     <string name="login_button">Login</string>
     <string name="logging_in">Logging in...</string>
     <string name="create_account_button">Create an Account</string>
