@@ -73,6 +73,18 @@ final class CommuteDashboardViewModel: ObservableObject {
         }
     }
 
+    var bookedRides: [CommuteRide] {
+        availableRides.filter { $0.isUserBooked }
+    }
+
+    var totalRidesTaken: Int {
+        totalRidesCompleted
+    }
+
+    var totalSeatsShared: Int {
+        totalRidesCompleted * 2
+    }
+
     func bookRide(_ ride: CommuteRide, userId: String = "current_user") {
         Task { @MainActor in
             do {

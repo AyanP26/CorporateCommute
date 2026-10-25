@@ -2,63 +2,55 @@ import Foundation
 import Combine
 
 final class MockAuthService: AuthServiceProtocol {
-    @Published private var _currentUser: User? = nil
+    private let currentUserSubject = CurrentValueSubject<User?, Never>(nil)
 
     var currentUserPublisher: AnyPublisher<User?, Never> {
-        $_currentUser.eraseToAnyPublisher()
+        currentUserSubject.eraseToAnyPublisher()
     }
 
     var currentUser: User? {
-        _currentUser
+        currentUserSubject.value
     }
 
     var isAuthenticated: Bool {
-        _currentUser != nil
+        currentUserSubject.value != nil
     }
 
     func register(name: String, email: String, password: String, phoneNumber: String) async throws -> User {
-        // Simulate network delay
-        try await Task.sleep(nanoseconds: 500_000_000)
-
-        guard email.contains("@") else {
-            throw NSError(domain: "AuthError", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid email address."])
-        }
-        guard password.count >= 6 else {
-            throw NSError(domain: "AuthError", code: 400, userInfo: [NSLocalizedDescriptionKey: "Password must be at least 6 characters."])
-        }
-
+        try await Task.sleep(nanoseconds: 600_000_000)
         let user = User(
             id: UUID().uuidString,
-            name: name.trimmingCharacters(in: .whitespaces),
-            email: email.trimmingCharacters(in: .whitespaces).lowercased(),
-            phoneNumber: phoneNumber.trimmingCharacters(in: .whitespaces)
+            name: name,
+            email: email,
+            phoneNumber: phoneNumber
         )
-        await MainActor.run {
-            self._currentUser = user
-        }
+        currentUserSubject.send(user)
         return user
     }
 
     func login(email: String, password: String) async throws -> User {
-        try await Task.sleep(nanoseconds: 500_000_000)
-
-        guard email.contains("@") && password.count >= 6 else {
-            throw NSError(domain: "AuthError", code: 401, userInfo: [NSLocalizedDescriptionKey: "Invalid email or password."])
-        }
-
+        try await Task.sleep(nanoseconds: 600_000_000)
         let user = User(
-            id: UUID().uuidString,
-            name: "Commuter",
-            email: email.lowercased(),
-            phoneNumber: ""
+            id: "mock_user_1",
+            name: "Alex Morgan",
+            email: email,
+            phoneNumber: "+1 (555) 345-6789",
+            officeLocation: "Corporate HQ - Innovation Campus",
+            role: "Senior Consultant",
+            company: "Corporate Global",
+            jobTitle: "Senior Consultant",
+            workLocation: CommuteLocation.corporateHQ
         )
-        await MainActor.run {
-            self._currentUser = user
-        }
+        currentUserSubject.send(user)
         return user
     }
 
+    func updateUserProfile(_ user: User) async throws {
+        try await Task.sleep(nanoseconds: 300_000_000)
+        currentUserSubject.send(user)
+    }
+
     func logout() throws {
-        self._currentUser = nil
+        currentUserSubject.send(nil)
     }
 }

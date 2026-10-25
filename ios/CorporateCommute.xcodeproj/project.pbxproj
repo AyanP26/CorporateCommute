@@ -33,6 +33,11 @@
 		E646E475308D832E000A35DA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E646E474308D832E000A35DA /* GoogleService-Info.plist */; };
 		E646E478308D871E000A35DA /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E646E477308D871E000A35DA /* FirebaseAuth */; };
 		E646E47A308D871E000A35DA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = E646E479308D871E000A35DA /* FirebaseFirestore */; };
+		A1B1C101 /* CommuteLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C101 /* CommuteLocation.swift */; };
+		A1B1C102 /* LocationSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C102 /* LocationSearchService.swift */; };
+		A1B1C103 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C103 /* LocationPickerView.swift */; };
+		A1B1C104 /* LocationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C104 /* LocationRowView.swift */; };
+		A1B1C105 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C105 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +68,11 @@
 		F545C33A230BAEE498E10B41 /* CorporateCommuteTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CorporateCommuteTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommuteRide.swift; sourceTree = "<group>"; };
 		FAE3FB1DFD0BC79B3A7B093E /* CommuteDashboardViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommuteDashboardViewModel.swift; sourceTree = "<group>"; };
+		A1F1C101 /* CommuteLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CommuteLocation.swift; sourceTree = "<group>"; };
+		A1F1C102 /* LocationSearchService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationSearchService.swift; sourceTree = "<group>"; };
+		A1F1C103 /* LocationPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
+		A1F1C104 /* LocationRowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationRowView.swift; sourceTree = "<group>"; };
+		A1F1C105 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FD00863D079807B208F10234 /* RideServiceProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideServiceProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,6 +106,7 @@
 				3E3A868A833B3FBCC3D95525 /* Protocols */,
 				498B3AC20413A06E3FABB04E /* Mock */,
 				92A9D915A7D3AAB2ACEFA5FE /* Firebase */,
+				A1F1C102 /* LocationSearchService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -123,8 +134,17 @@
 				F7177E79C03B1CD259E6AB91 /* Authentication */,
 				3B81A24EA4F41D32EBEFAEEF /* Components */,
 				3E0047BCAE49B474E77CE0E5 /* Main */,
+				A1F1C100 /* Settings */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A1F1C100 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A1F1C105 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		3B81A24EA4F41D32EBEFAEEF /* Components */ = {
@@ -134,6 +154,8 @@
 				65C9B15544F7BC8922326E8F /* CustomTextField.swift */,
 				EC7FE9969BE53F7B6050CCE6 /* PrimaryButton.swift */,
 				45CD9DC83037B3CE0A4AF85D /* RideCardView.swift */,
+				A1F1C103 /* LocationPickerView.swift */,
+				A1F1C104 /* LocationRowView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -220,6 +242,7 @@
 			children = (
 				09CB9C4CE473834B35CFEDCF /* User.swift */,
 				F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */,
+				A1F1C101 /* CommuteLocation.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -342,6 +365,11 @@
 				7EC1246FE6F4CBE5147B5BAB /* MockRideService.swift in Sources */,
 				30550E269E54BA579CB4A4B4 /* FirebaseAuthService.swift in Sources */,
 				51FDDC174A8E475FD745AC07 /* FirestoreRideService.swift in Sources */,
+				A1B1C101 /* CommuteLocation.swift in Sources */,
+				A1B1C102 /* LocationSearchService.swift in Sources */,
+				A1B1C103 /* LocationPickerView.swift in Sources */,
+				A1B1C104 /* LocationRowView.swift in Sources */,
+				A1B1C105 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

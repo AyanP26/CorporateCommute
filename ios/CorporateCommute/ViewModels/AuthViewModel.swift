@@ -101,6 +101,28 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
+    func saveUserProfile(_ user: User) async -> Bool {
+        await MainActor.run {
+            self.isSubmitting = true
+            self.errorMessage = nil
+        }
+
+        do {
+            try await authService.updateUserProfile(user)
+            await MainActor.run {
+                self.currentUser = user
+                self.isSubmitting = false
+            }
+            return true
+        } catch {
+            await MainActor.run {
+                self.isSubmitting = false
+                self.errorMessage = error.localizedDescription
+            }
+            return false
+        }
+    }
+
     func logout() {
         do {
             try authService.logout()

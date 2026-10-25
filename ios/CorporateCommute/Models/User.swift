@@ -9,6 +9,17 @@ struct User: Identifiable, Codable, Equatable {
     var role: String
     var createdAt: Date
 
+    // Extended settings fields
+    var company: String
+    var jobTitle: String
+    var workLocation: CommuteLocation?
+    var homeLocation: CommuteLocation?
+    var preferredRole: String // "Rider", "Driver", "Flexible"
+    var vehicleModel: String
+    var vehicleColor: String
+    var vehicleSeats: Int
+    var notificationsEnabled: Bool
+
     init(
         id: String = UUID().uuidString,
         name: String,
@@ -16,7 +27,16 @@ struct User: Identifiable, Codable, Equatable {
         phoneNumber: String = "",
         officeLocation: String = "Corporate HQ - Innovation Campus",
         role: String = "Commuter",
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        company: String = "Corporate Inc.",
+        jobTitle: String = "Associate",
+        workLocation: CommuteLocation? = CommuteLocation.corporateHQ,
+        homeLocation: CommuteLocation? = nil,
+        preferredRole: String = "Flexible",
+        vehicleModel: String = "",
+        vehicleColor: String = "",
+        vehicleSeats: Int = 3,
+        notificationsEnabled: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -25,19 +45,44 @@ struct User: Identifiable, Codable, Equatable {
         self.officeLocation = officeLocation
         self.role = role
         self.createdAt = createdAt
+        self.company = company
+        self.jobTitle = jobTitle
+        self.workLocation = workLocation
+        self.homeLocation = homeLocation
+        self.preferredRole = preferredRole
+        self.vehicleModel = vehicleModel
+        self.vehicleColor = vehicleColor
+        self.vehicleSeats = vehicleSeats
+        self.notificationsEnabled = notificationsEnabled
     }
 
     // Firestore Dictionary Representation
     var dictionaryRepresentation: [String: Any] {
-        return [
+        var dict: [String: Any] = [
             "id": id,
             "name": name,
             "email": email,
             "phoneNumber": phoneNumber,
             "officeLocation": officeLocation,
             "role": role,
-            "createdAt": createdAt.timeIntervalSince1970
+            "createdAt": createdAt.timeIntervalSince1970,
+            "company": company,
+            "jobTitle": jobTitle,
+            "preferredRole": preferredRole,
+            "vehicleModel": vehicleModel,
+            "vehicleColor": vehicleColor,
+            "vehicleSeats": vehicleSeats,
+            "notificationsEnabled": notificationsEnabled
         ]
+
+        if let work = workLocation {
+            dict["workLocation"] = work.dictionaryRepresentation
+        }
+        if let home = homeLocation {
+            dict["homeLocation"] = home.dictionaryRepresentation
+        }
+
+        return dict
     }
 
     init?(dictionary: [String: Any]) {
@@ -56,6 +101,26 @@ struct User: Identifiable, Codable, Equatable {
             self.createdAt = Date(timeIntervalSince1970: timestamp)
         } else {
             self.createdAt = Date()
+        }
+
+        self.company = dictionary["company"] as? String ?? "Corporate Inc."
+        self.jobTitle = dictionary["jobTitle"] as? String ?? "Associate"
+        self.preferredRole = dictionary["preferredRole"] as? String ?? "Flexible"
+        self.vehicleModel = dictionary["vehicleModel"] as? String ?? ""
+        self.vehicleColor = dictionary["vehicleColor"] as? String ?? ""
+        self.vehicleSeats = dictionary["vehicleSeats"] as? Int ?? 3
+        self.notificationsEnabled = dictionary["notificationsEnabled"] as? Bool ?? true
+
+        if let workDict = dictionary["workLocation"] as? [String: Any] {
+            self.workLocation = CommuteLocation(dictionary: workDict)
+        } else {
+            self.workLocation = CommuteLocation.corporateHQ
+        }
+
+        if let homeDict = dictionary["homeLocation"] as? [String: Any] {
+            self.homeLocation = CommuteLocation(dictionary: homeDict)
+        } else {
+            self.homeLocation = nil
         }
     }
 }

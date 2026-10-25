@@ -70,7 +70,7 @@ final class FirebaseAuthService: AuthServiceProtocol {
         throw NSError(
             domain: "FirebaseError",
             code: 501,
-            userInfo: [NSLocalizedDescriptionKey: "FirebaseAuth SDK is not linked. Add Firebase via Swift Package Manager to enable live authentication."]
+            userInfo: [NSLocalizedDescriptionKey: "FirebaseAuth SDK is not linked."]
         )
         #endif
     }
@@ -99,9 +99,28 @@ final class FirebaseAuthService: AuthServiceProtocol {
         throw NSError(
             domain: "FirebaseError",
             code: 501,
-            userInfo: [NSLocalizedDescriptionKey: "FirebaseAuth SDK is not linked. Add Firebase via Swift Package Manager to enable live authentication."]
+            userInfo: [NSLocalizedDescriptionKey: "FirebaseAuth SDK is not linked."]
         )
         #endif
+    }
+
+    func updateUserProfile(_ user: User) async throws {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        try await db.collection("users").document(user.id).setData(user.dictionaryRepresentation, merge: true)
+        #endif
+
+        #if canImport(FirebaseAuth)
+        if let fUser = Auth.auth().currentUser, fUser.displayName != user.name {
+            let changeRequest = fUser.createProfileChangeRequest()
+            changeRequest.displayName = user.name
+            try await changeRequest.commitChanges()
+        }
+        #endif
+
+        await MainActor.run {
+            self._currentUser = user
+        }
     }
 
     func logout() throws {

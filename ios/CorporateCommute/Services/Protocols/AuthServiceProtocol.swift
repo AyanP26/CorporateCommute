@@ -8,5 +8,6 @@ protocol AuthServiceProtocol: AnyObject {
 
     func register(name: String, email: String, password: String, phoneNumber: String) async throws -> User
     func login(email: String, password: String) async throws -> User
+    func updateUserProfile(_ user: User) async throws
     func logout() throws
 }
