@@ -12,7 +12,7 @@ import com.google.android.material.button.MaterialButton;
 public class HomeActivity extends AppCompatActivity {
 
     private TextView tvWelcomeUser, tvUserEmail;
-    private MaterialButton btnLogout;
+    private MaterialButton btnPostRide, btnLogout;
     private AuthViewModel authViewModel;
 
     @Override
@@ -24,16 +24,23 @@ public class HomeActivity extends AppCompatActivity {
 
         tvWelcomeUser = findViewById(R.id.tvWelcomeUser);
         tvUserEmail = findViewById(R.id.tvUserEmail);
+        btnPostRide = findViewById(R.id.btnPostRide);
         btnLogout = findViewById(R.id.btnLogout);
 
-        User currentUser = authViewModel.getCurrentUser();
-        if (currentUser != null) {
-            tvWelcomeUser.setText("Welcome, " + currentUser.getName() + "!");
-            tvUserEmail.setText(currentUser.getEmail());
-        } else {
-            tvWelcomeUser.setText("Welcome, Commuter!");
-            tvUserEmail.setText("");
-        }
+        authViewModel.getCurrentUserData(user -> {
+            if (user != null) {
+                tvWelcomeUser.setText(getString(R.string.welcome_user_format, user.getName()));
+                tvUserEmail.setText(user.getEmail());
+            } else {
+                tvWelcomeUser.setText(R.string.welcome_default);
+                tvUserEmail.setText("");
+            }
+        });
+
+        btnPostRide.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, CreateRideActivity.class);
+            startActivity(intent);
+        });
 
         btnLogout.setOnClickListener(v -> {
             authViewModel.logout();

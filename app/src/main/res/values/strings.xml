@@ -19,4 +19,17 @@
     <string name="dashboard_title">Your Commute Dashboard</string>
     <string name="dashboard_desc">You\'re all set up with Corporate Commute. Rideshare schedules, vehicle pooling, and company routes will appear here.</string>
     <string name="logout_button">Log Out</string>
+
+    <!-- Post a Ride Strings -->
+    <string name="create_ride_title">Post a Ride</string>
+    <string name="hint_pickup">Pickup Location (e.g. Reston)</string>
+    <string name="hint_destination">Destination (e.g. HQ / Tysons)</string>
+    <string name="hint_date">Departure Date (YYYY-MM-DD)</string>
+    <string name="hint_time">Departure Time (e.g. 08:30 AM)</string>
+    <string name="hint_seats">Available Seats (e.g. 3)</string>
+    <string name="hint_notes">Notes / Guidelines (optional)</string>
+    <string name="post_ride_button">Post Ride</string>
+    <string name="posting_ride">Posting Ride...</string>
+    <string name="error_create_ride">Please fill in pickup, destination, date, time, and seats.</string>
+    <string name="ride_posted_success">Ride successfully posted!</string>
 </resources>
