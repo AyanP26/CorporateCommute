@@ -20,7 +20,7 @@
     <string name="dashboard_desc">You\'re all set up with Corporate Commute. Rideshare schedules, vehicle pooling, and company routes will appear here.</string>
     <string name="logout_button">Log Out</string>
 
-    <!-- Post a Ride Strings -->
+    <!-- Post a Ride & Rides List Strings -->
     <string name="create_ride_title">Post a Ride</string>
     <string name="hint_pickup">Pickup Location (e.g. Reston)</string>
     <string name="hint_destination">Destination (e.g. HQ / Tysons)</string>
@@ -32,4 +32,10 @@
     <string name="posting_ride">Posting Ride...</string>
     <string name="error_create_ride">Please fill in pickup, destination, date, time, and seats.</string>
     <string name="ride_posted_success">Ride successfully posted!</string>
+
+    <string name="available_rides_title">Available Commute Rides</string>
+    <string name="no_rides_found">No rides found. Post a ride to get started!</string>
+    <string name="seats_format">%1$d Seats</string>
+    <string name="route_format">%1$s  ➔  %2$s</string>
+    <string name="date_time_format">Date: %1$s  |  Time: %2$s</string>
 </resources>
