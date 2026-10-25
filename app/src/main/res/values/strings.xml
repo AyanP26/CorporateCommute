@@ -1,12 +1,20 @@
 <resources>
     <string name="app_name">Corporate Commute</string>
     <string name="welcome_title">Welcome to Corporate\nCommute!</string>
+    <string name="welcome_back">Welcome Back</string>
     <string name="login_button">Login</string>
+    <string name="logging_in">Logging in...</string>
     <string name="create_account_button">Create an Account</string>
     <string name="create_account_title">Create an Account</string>
+    <string name="submitting">Submitting...</string>
     <string name="hint_name">Name</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="hint_phone">Phone Number</string>
     <string name="submit_button">Submit</string>
+    <string name="error_registration">Please fill in all fields with valid information (password min 6 characters).</string>
+    <string name="error_login">Please enter a valid email and password.</string>
+    <string name="dashboard_title">Your Commute Dashboard</string>
+    <string name="dashboard_desc">You\'re all set up with Corporate Commute. Rideshare schedules, vehicle pooling, and company routes will appear here.</string>
+    <string name="logout_button">Log Out</string>
 </resources>

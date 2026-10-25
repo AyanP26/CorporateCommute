@@ -9,6 +9,7 @@
     android:paddingHorizontal="32dp"
     tools:context=".CreateAccountActivity">
 
+    <!--Create an Account text-->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
@@ -16,7 +17,7 @@
         android:gravity="center"
         android:text="@string/create_account_title"
         android:textColor="@color/white"
-        android:textSize="30sp"
+        android:textSize="60sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/etName"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,6 +26,7 @@
         app:layout_constraintVertical_bias="0.25"
         app:layout_constraintVertical_chainStyle="packed" />
 
+    <!--Name Input-->
     <EditText
         android:id="@+id/etName"
         android:layout_width="0dp"
@@ -38,12 +40,13 @@
         android:paddingHorizontal="20dp"
         android:textColor="@color/white"
         android:textColorHint="#D1D1D1"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@id/etEmail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+    <!--Email Input-->
     <EditText
         android:id="@+id/etEmail"
         android:layout_width="0dp"
@@ -57,12 +60,13 @@
         android:paddingHorizontal="20dp"
         android:textColor="@color/white"
         android:textColorHint="#D1D1D1"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@id/etPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etName" />
 
+    <!--Password Input-->
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="0dp"
@@ -76,12 +80,13 @@
         android:paddingHorizontal="20dp"
         android:textColor="@color/white"
         android:textColorHint="#D1D1D1"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@id/etPhone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etEmail" />
 
+    <!--Phone Number Input-->
     <EditText
         android:id="@+id/etPhone"
         android:layout_width="0dp"
@@ -95,12 +100,13 @@
         android:paddingHorizontal="20dp"
         android:textColor="@color/white"
         android:textColorHint="#D1D1D1"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@id/btnSubmit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/etPassword" />
 
+    <!--Submit-->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSubmit"
         android:layout_width="0dp"
@@ -109,7 +115,7 @@
         android:text="@string/submit_button"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:backgroundTint="@color/button_purple"
         app:cornerRadius="28dp"
         app:layout_constraintBottom_toBottomOf="parent"
