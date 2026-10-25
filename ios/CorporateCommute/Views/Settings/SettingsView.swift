@@ -31,7 +31,7 @@ struct SettingsView: View {
                 BackgroundGradient()
 
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         // User Avatar & Email Header
                         profileHeader
                             .padding(.top, 12)
@@ -54,7 +54,7 @@ struct SettingsView: View {
                         notificationsSection
 
                         // Save Button
-                        PrimaryButton(title: "Save Settings") {
+                        PrimaryButton(title: "Save Profile", style: .accent) {
                             saveSettings()
                         }
                         .padding(.top, 8)
@@ -66,21 +66,25 @@ struct SettingsView: View {
                                 Text("Log Out")
                             }
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(.red.opacity(0.85))
+                            .foregroundColor(AppTheme.errorRed)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(
                                 RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                                    .fill(Color.red.opacity(0.12))
+                                    .fill(AppTheme.errorRed.opacity(0.12))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                                            .stroke(Color.red.opacity(0.25), lineWidth: 1)
+                                            .stroke(AppTheme.errorRed.opacity(0.3), lineWidth: 1)
                                     )
                             )
                         }
                         .padding(.bottom, 40)
                     }
                     .padding(.horizontal, AppTheme.horizontalPadding)
+                }
+                .scrollDismissesKeyboard(.interactively)
+                .onTapGesture {
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
             }
             .navigationTitle("User Settings")
@@ -98,8 +102,8 @@ struct SettingsView: View {
                     Button("Save") {
                         saveSettings()
                     }
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(AppTheme.accentBlue)
                 }
             }
             .sheet(isPresented: $showingWorkLocationPicker) {
@@ -125,7 +129,7 @@ struct SettingsView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Are you sure you want to log out?")
+                Text("Are you sure you want to log out of Corporate Commute?")
             }
             .overlay(alignment: .top) {
                 if showSavedBanner {
@@ -141,10 +145,10 @@ struct SettingsView: View {
 
     // MARK: - Profile Header
     private var profileHeader: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             Circle()
                 .fill(LinearGradient(
-                    colors: [Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0), AppTheme.bgBottomLeft],
+                    colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 ))
@@ -154,7 +158,7 @@ struct SettingsView: View {
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                 )
-                .shadow(color: Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.3), radius: 10)
+                .shadow(color: AppTheme.accentBlue.opacity(0.35), radius: 10)
 
             VStack(spacing: 4) {
                 Text(name.isEmpty ? "Corporate Commuter" : name)
@@ -167,25 +171,53 @@ struct SettingsView: View {
             }
 
             VStack(spacing: 12) {
-                CustomTextField(placeholder: "Full Name", text: $name)
-                CustomTextField(placeholder: "Phone Number", text: $phoneNumber)
+                CustomTextField(
+                    placeholder: "Full Name",
+                    text: $name,
+                    icon: "person.fill",
+                    textContentType: .name,
+                    autocapitalization: .words
+                )
+
+                CustomTextField(
+                    placeholder: "Phone Number",
+                    text: $phoneNumber,
+                    icon: "phone.fill",
+                    keyboardType: .phonePad,
+                    textContentType: .telephoneNumber
+                )
             }
             .padding(.top, 4)
         }
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
     // MARK: - Job Location Section (Apple Maps)
     private var jobLocationSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(title: "Work & Job Details", icon: "briefcase.fill")
+            sectionHeader(title: "Workplace & Employer", icon: "briefcase.fill")
 
-            CustomTextField(placeholder: "Company / Employer", text: $company)
-            CustomTextField(placeholder: "Job Title (e.g. Software Engineer)", text: $jobTitle)
+            CustomTextField(
+                placeholder: "Company / Employer",
+                text: $company,
+                icon: "building.2.fill",
+                autocapitalization: .words
+            )
+
+            CustomTextField(
+                placeholder: "Job Title (e.g. Lead Engineer)",
+                text: $jobTitle,
+                icon: "person.text.rectangle.fill",
+                autocapitalization: .words
+            )
 
             LocationRowView(
                 icon: "building.2.crop.circle.fill",
@@ -199,7 +231,11 @@ struct SettingsView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
@@ -220,14 +256,18 @@ struct SettingsView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
     // MARK: - Commute Preferences
     private var commutePreferencesSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            sectionHeader(title: "Commute Role", icon: "person.2.fill")
+            sectionHeader(title: "Carpool Role", icon: "person.2.fill")
 
             Picker("Preferred Role", selection: $preferredRole) {
                 ForEach(roles, id: \.self) { role in
@@ -242,7 +282,11 @@ struct SettingsView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
@@ -251,13 +295,28 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeader(title: "Vehicle Details", icon: "car.fill")
 
-            CustomTextField(placeholder: "Vehicle Make & Model (e.g. Tesla Model 3)", text: $vehicleModel)
-            CustomTextField(placeholder: "Vehicle Color", text: $vehicleColor)
+            CustomTextField(
+                placeholder: "Vehicle Make & Model (e.g. Tesla Model 3)",
+                text: $vehicleModel,
+                icon: "car.side.fill",
+                autocapitalization: .words
+            )
+
+            CustomTextField(
+                placeholder: "Vehicle Color (e.g. Midnight Silver)",
+                text: $vehicleColor,
+                icon: "paintpalette.fill",
+                autocapitalization: .words
+            )
 
             HStack {
-                Text("Passenger Seats Available:")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppTheme.textLight)
+                HStack(spacing: 8) {
+                    Image(systemName: "person.2.badge.gearshape.fill")
+                        .foregroundColor(AppTheme.accentBlue)
+                    Text("Passenger Seats:")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AppTheme.textLight)
+                }
 
                 Spacer()
 
@@ -265,16 +324,24 @@ struct SettingsView: View {
                     .foregroundColor(AppTheme.textLight)
             }
             .padding(.horizontal, 16)
-            .frame(height: 50)
+            .frame(height: 52)
             .background(
                 RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                    .fill(AppTheme.buttonPurple)
+                    .fill(AppTheme.inputBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                    )
             )
         }
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
@@ -293,19 +360,23 @@ struct SettingsView: View {
                         .foregroundColor(AppTheme.placeholderText)
                 }
             }
-            .tint(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+            .tint(AppTheme.accentBlue)
         }
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
     private func sectionHeader(title: String, icon: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                .foregroundColor(AppTheme.accentBlue)
             Text(title)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
@@ -315,7 +386,7 @@ struct SettingsView: View {
     private var savedNotificationBanner: some View {
         HStack(spacing: 10) {
             Image(systemName: "checkmark.circle.fill")
-                .foregroundColor(.green)
+                .foregroundColor(AppTheme.ecoGreen)
             Text("Settings saved successfully!")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundColor(.white)
@@ -325,7 +396,7 @@ struct SettingsView: View {
         .background(
             Capsule()
                 .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0))
-                .overlay(Capsule().stroke(Color.green.opacity(0.4), lineWidth: 1))
+                .overlay(Capsule().stroke(AppTheme.ecoGreen.opacity(0.5), lineWidth: 1))
         )
         .padding(.top, 16)
         .shadow(color: .black.opacity(0.4), radius: 10, y: 5)
@@ -364,7 +435,7 @@ struct SettingsView: View {
         Task {
             let success = await authViewModel.saveUserProfile(user)
             if success {
-                withAnimation {
+                withAnimation(.spring()) {
                     showSavedBanner = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {

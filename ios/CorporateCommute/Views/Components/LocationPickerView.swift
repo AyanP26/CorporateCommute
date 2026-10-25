@@ -38,7 +38,7 @@ struct LocationPickerView: View {
                 // Interactive Apple Map
                 Map(position: $cameraPosition) {
                     Marker(selectedLocation.name, coordinate: selectedLocation.coordinate)
-                        .tint(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                        .tint(AppTheme.accentBlue)
                 }
                 .mapStyle(.standard(elevation: .realistic))
                 .ignoresSafeArea()
@@ -63,10 +63,29 @@ struct LocationPickerView: View {
 
                     Spacer()
 
-                    // Bottom Confirmation Card
-                    selectionConfirmationCard
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
+                    // Floating re-center button & Bottom Confirmation Card
+                    VStack(alignment: .trailing, spacing: 14) {
+                        HStack {
+                            Spacer()
+                            Button(action: centerOnCurrentLocation) {
+                                Image(systemName: "location.fill")
+                                    .font(.system(size: 18))
+                                    .foregroundColor(AppTheme.accentBlue)
+                                    .frame(width: 46, height: 46)
+                                    .background(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.92))
+                                    .clipShape(Circle())
+                                    .overlay(
+                                        Circle().stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    )
+                                    .shadow(color: .black.opacity(0.3), radius: 8, y: 4)
+                            }
+                            .padding(.trailing, 16)
+                        }
+
+                        selectionConfirmationCard
+                            .padding(.horizontal, 16)
+                            .padding(.bottom, 20)
+                    }
                 }
             }
             .navigationTitle(title)
@@ -89,7 +108,7 @@ struct LocationPickerView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(AppTheme.placeholderText)
 
-            TextField("", text: $searchService.searchQuery, prompt: Text("Search on Apple Maps...").foregroundColor(AppTheme.placeholderText))
+            TextField("", text: $searchService.searchQuery, prompt: Text("Search location on Apple Maps...").foregroundColor(AppTheme.placeholderText))
                 .tint(.white)
                 .foregroundColor(AppTheme.textLight)
                 .font(.system(size: 14))
@@ -109,13 +128,13 @@ struct LocationPickerView: View {
         .frame(height: 50)
         .background(
             RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.92))
+                .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.94))
                 .overlay(
                     RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
                 )
         )
-        .shadow(color: .black.opacity(0.3), radius: 10, y: 5)
+        .shadow(color: .black.opacity(0.35), radius: 10, y: 5)
     }
 
     // MARK: - Suggestions Dropdown
@@ -130,7 +149,7 @@ struct LocationPickerView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "mappin.and.ellipse")
                                     .font(.system(size: 16))
-                                    .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                                    .foregroundColor(AppTheme.accentBlue)
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(result.title)
@@ -170,7 +189,7 @@ struct LocationPickerView: View {
                 .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.96))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
                 )
         )
         .shadow(color: .black.opacity(0.4), radius: 12, y: 6)
@@ -181,6 +200,7 @@ struct LocationPickerView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(CommuteLocation.samplePresets) { preset in
+                    let isSelected = selectedLocation.name == preset.name
                     Button(action: {
                         choosePreset(preset)
                     }) {
@@ -188,16 +208,16 @@ struct LocationPickerView: View {
                             Image(systemName: "building.2.fill")
                                 .font(.system(size: 11))
                             Text(preset.name.components(separatedBy: " - ").first ?? preset.name)
-                                .font(.system(size: 12, weight: .medium))
+                                .font(.system(size: 12, weight: .semibold))
                         }
-                        .foregroundColor(AppTheme.textLight)
+                        .foregroundColor(isSelected ? .white : AppTheme.textLight.opacity(0.85))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                         .background(
                             Capsule()
-                                .fill(Color(red: 0x3E / 255.0, green: 0x00 / 255.0, blue: 0x3B / 255.0).opacity(0.85))
+                                .fill(isSelected ? AppTheme.accentBlue : AppTheme.buttonPurple.opacity(0.85))
                                 .overlay(
-                                    Capsule().stroke(Color.white.opacity(0.12), lineWidth: 1)
+                                    Capsule().stroke(isSelected ? AppTheme.accentBlue : Color.white.opacity(0.15), lineWidth: 1)
                                 )
                         )
                     }
@@ -211,12 +231,12 @@ struct LocationPickerView: View {
         VStack(spacing: 14) {
             HStack(spacing: 12) {
                 Circle()
-                    .fill(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.2))
+                    .fill(AppTheme.accentBlueSoft)
                     .frame(width: 44, height: 44)
                     .overlay(
                         Image(systemName: "map.fill")
                             .font(.system(size: 18))
-                            .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                            .foregroundColor(AppTheme.accentBlue)
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -234,7 +254,7 @@ struct LocationPickerView: View {
                 Spacer()
             }
 
-            PrimaryButton(title: "Confirm Location") {
+            PrimaryButton(title: "Confirm Location", style: .accent) {
                 onLocationSelected(selectedLocation)
                 dismiss()
             }
@@ -242,13 +262,24 @@ struct LocationPickerView: View {
         .padding(20)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.95))
+                .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0).opacity(0.96))
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
                 )
         )
         .shadow(color: .black.opacity(0.5), radius: 16, y: 8)
+    }
+
+    private func centerOnCurrentLocation() {
+        withAnimation(.easeInOut(duration: 0.5)) {
+            cameraPosition = .region(
+                MKCoordinateRegion(
+                    center: selectedLocation.coordinate,
+                    span: MKCoordinateSpan(latitudeDelta: 0.02, longitudeDelta: 0.02)
+                )
+            )
+        }
     }
 
     private func selectSearchResult(_ result: LocationSearchResult) {

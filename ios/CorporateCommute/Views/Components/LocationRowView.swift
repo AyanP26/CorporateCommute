@@ -25,18 +25,18 @@ struct LocationRowView: View {
         Button(action: onSelect) {
             HStack(spacing: 14) {
                 Circle()
-                    .fill(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.2))
-                    .frame(width: 40, height: 40)
+                    .fill(AppTheme.accentBlueSoft)
+                    .frame(width: 42, height: 42)
                     .overlay(
                         Image(systemName: icon)
-                            .font(.system(size: 16))
-                            .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                            .font(.system(size: 17))
+                            .foregroundColor(AppTheme.accentBlue)
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(label)
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(AppTheme.placeholderText)
+                        .foregroundColor(AppTheme.accentBlue)
                         .textCase(.uppercase)
 
                     if let loc = location {
@@ -58,22 +58,26 @@ struct LocationRowView: View {
 
                 Spacer()
 
-                HStack(spacing: 4) {
-                    Image(systemName: "map")
-                        .font(.system(size: 13))
+                HStack(spacing: 6) {
+                    Image(systemName: "map.fill")
+                        .font(.system(size: 12))
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 11))
+                        .font(.system(size: 11, weight: .semibold))
                 }
-                .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                .foregroundColor(AppTheme.accentBlue)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(AppTheme.accentBlueSoft)
+                .cornerRadius(8)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(AppTheme.buttonPurple.opacity(0.85))
+                    .fill(AppTheme.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 18)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                            .stroke(AppTheme.cardBorder, lineWidth: 1)
                     )
             )
         }

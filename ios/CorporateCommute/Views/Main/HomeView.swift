@@ -7,6 +7,10 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var showingLogoutConfirmation = false
 
+    // Quick Carpool Filter
+    @State private var carpoolTimeFilter: String = "All"
+    private let carpoolFilters = ["All", "Morning (AM)", "Afternoon (PM)"]
+
     // Location Pickers for Offering Ride
     @State private var showingOriginPicker = false
     @State private var showingDestinationPicker = false
@@ -22,7 +26,7 @@ struct HomeView: View {
                     // Top App Header
                     headerView
                         .padding(.horizontal, AppTheme.horizontalPadding)
-                        .padding(.top, 16)
+                        .padding(.top, 14)
                         .padding(.bottom, 12)
 
                     // Segmented Filter Tabs
@@ -45,6 +49,7 @@ struct HomeView: View {
                         .padding(.horizontal, AppTheme.horizontalPadding)
                         .padding(.bottom, 40)
                     }
+                    .scrollDismissesKeyboard(.interactively)
                 }
             }
             .sheet(isPresented: $showingSettings) {
@@ -70,18 +75,26 @@ struct HomeView: View {
         HStack(alignment: .center) {
             Button(action: { showingSettings = true }) {
                 HStack(spacing: 12) {
-                    Circle()
-                        .fill(LinearGradient(
-                            colors: [Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0), AppTheme.bgBottomLeft],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 44, height: 44)
-                        .overlay(
-                            Text(String(authViewModel.currentUser?.name.prefix(1) ?? "C").uppercased())
-                                .font(.system(size: 18, weight: .bold, design: .rounded))
-                                .foregroundColor(.white)
-                        )
+                    ZStack(alignment: .bottomTrailing) {
+                        Circle()
+                            .fill(LinearGradient(
+                                colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                            .frame(width: 44, height: 44)
+                            .overlay(
+                                Text(String(authViewModel.currentUser?.name.prefix(1) ?? "C").uppercased())
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                            )
+                            .shadow(color: AppTheme.accentBlue.opacity(0.3), radius: 6)
+
+                        Circle()
+                            .fill(AppTheme.ecoGreen)
+                            .frame(width: 12, height: 12)
+                            .overlay(Circle().stroke(AppTheme.bgTop, lineWidth: 2))
+                    }
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Hi, \(authViewModel.currentUser?.name ?? "Commuter")")
@@ -91,7 +104,7 @@ struct HomeView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "mappin.circle.fill")
                                 .font(.system(size: 11))
-                                .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                                .foregroundColor(AppTheme.accentBlue)
                             Text(authViewModel.currentUser?.workLocation?.name ?? authViewModel.currentUser?.officeLocation ?? "Corporate HQ")
                                 .font(.system(size: 12))
                                 .foregroundColor(AppTheme.placeholderText)
@@ -104,9 +117,8 @@ struct HomeView: View {
             Spacer()
 
             HStack(spacing: 10) {
-                // Post Ride
+                // Post Ride Quick Button
                 Button(action: {
-                    // Prepopulate with user settings if available
                     if let home = authViewModel.currentUser?.homeLocation {
                         selectedOriginLocation = home
                         dashboardVM.newRideOrigin = home.name
@@ -121,18 +133,27 @@ struct HomeView: View {
                     }
                     dashboardVM.showingOfferRideSheet = true
                 }) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 26))
-                        .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                    HStack(spacing: 5) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 13, weight: .bold))
+                        Text("Offer")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(AppTheme.accentBlue)
+                    .clipShape(Capsule())
+                    .shadow(color: AppTheme.accentBlue.opacity(0.35), radius: 6)
                 }
 
                 // Settings Gear
                 Button(action: { showingSettings = true }) {
                     Image(systemName: "gearshape.fill")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(AppTheme.textLight.opacity(0.85))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(AppTheme.textLight.opacity(0.9))
                         .padding(9)
-                        .background(Color.white.opacity(0.08))
+                        .background(Color.white.opacity(0.1))
                         .clipShape(Circle())
                 }
             }
@@ -141,7 +162,7 @@ struct HomeView: View {
 
     // MARK: - Segmented Tab Bar
     private var segmentedTabBar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 6) {
             tabButton(title: "My Commute", index: 0)
             tabButton(title: "Find Carpool", index: 1)
             tabButton(title: "Eco Stats", index: 2)
@@ -149,11 +170,15 @@ struct HomeView: View {
         .padding(4)
         .background(Color.black.opacity(0.35))
         .cornerRadius(AppTheme.pillCornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
     }
 
     private func tabButton(title: String, index: Int) -> some View {
         Button(action: {
-            withAnimation(.easeInOut(duration: 0.2)) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
                 dashboardVM.selectedTab = index
             }
         }) {
@@ -161,10 +186,10 @@ struct HomeView: View {
                 .font(.system(size: 14, weight: dashboardVM.selectedTab == index ? .bold : .medium, design: .rounded))
                 .foregroundColor(dashboardVM.selectedTab == index ? .white : AppTheme.placeholderText)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                .padding(.vertical, 9)
                 .background(
                     RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                        .fill(dashboardVM.selectedTab == index ? Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0) : Color.clear)
+                        .fill(dashboardVM.selectedTab == index ? AppTheme.accentBlue : Color.clear)
                 )
         }
     }
@@ -182,9 +207,9 @@ struct HomeView: View {
             HStack(spacing: 12) {
                 quickActionCard(
                     title: "Offer Ride",
-                    subtitle: "Share commute",
+                    subtitle: "Share commute route",
                     icon: "steeringwheel",
-                    color: Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0)
+                    color: AppTheme.accentBlue
                 ) {
                     dashboardVM.showingOfferRideSheet = true
                 }
@@ -193,13 +218,13 @@ struct HomeView: View {
                     title: "User Settings",
                     subtitle: "Job & car details",
                     icon: "slider.horizontal.3",
-                    color: Color(red: 0.4, green: 0.9, blue: 0.6)
+                    color: AppTheme.ecoGreen
                 ) {
                     showingSettings = true
                 }
             }
 
-            // Booked Rides Header
+            // Booked Rides Section
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Your Scheduled Rides")
@@ -207,8 +232,12 @@ struct HomeView: View {
                         .foregroundColor(AppTheme.textLight)
                     Spacer()
                     Text("\(dashboardVM.bookedRides.count) active")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(AppTheme.accentBlue)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(AppTheme.accentBlueSoft)
+                        .clipShape(Capsule())
                 }
 
                 if dashboardVM.bookedRides.isEmpty {
@@ -231,37 +260,43 @@ struct HomeView: View {
             HStack {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(Color(red: 0.3, green: 0.85, blue: 0.5))
+                        .fill(AppTheme.ecoGreen)
                         .frame(width: 8, height: 8)
                     Text("TODAY'S COMMUTE")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(Color(red: 0.3, green: 0.85, blue: 0.5))
+                        .foregroundColor(AppTheme.ecoGreen)
                 }
                 Spacer()
                 Text("Confirmed")
                     .font(.system(size: 12, weight: .bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.green.opacity(0.2))
-                    .foregroundColor(Color(red: 0.4, green: 0.9, blue: 0.6))
+                    .background(AppTheme.ecoGreenSoft)
+                    .foregroundColor(AppTheme.ecoGreen)
                     .cornerRadius(8)
             }
 
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .top, spacing: 14) {
                 VStack(spacing: 4) {
                     Circle()
-                        .fill(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
-                        .frame(width: 12, height: 12)
+                        .fill(AppTheme.accentBlue)
+                        .frame(width: 10, height: 10)
                     Rectangle()
-                        .fill(Color.white.opacity(0.2))
-                        .frame(width: 2, height: 26)
+                        .fill(
+                            LinearGradient(
+                                colors: [AppTheme.accentBlue, AppTheme.ecoGreen],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 2, height: 32)
                     Circle()
-                        .fill(Color(red: 0.4, green: 0.9, blue: 0.6))
-                        .frame(width: 12, height: 12)
+                        .fill(AppTheme.ecoGreen)
+                        .frame(width: 10, height: 10)
                 }
                 .padding(.top, 4)
 
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(authViewModel.currentUser?.homeLocation?.name ?? "Home")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -289,24 +324,24 @@ struct HomeView: View {
             HStack {
                 HStack(spacing: 8) {
                     Image(systemName: "car.side.fill")
-                        .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                        .foregroundColor(AppTheme.accentBlue)
                     Text("Tesla Model 3 • Blue")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(AppTheme.textLight)
                 }
                 Spacer()
                 Text("2 colleagues joining")
-                    .font(.system(size: 12))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundColor(AppTheme.placeholderText)
             }
         }
         .padding(18)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple)
+                .fill(AppTheme.cardBackground)
                 .overlay(
                     RoundedRectangle(cornerRadius: 24)
-                        .stroke(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.4), lineWidth: 1)
+                        .stroke(AppTheme.accentBlue.opacity(0.4), lineWidth: 1)
                 )
         )
     }
@@ -317,18 +352,18 @@ struct HomeView: View {
 
         return HStack(spacing: 14) {
             Circle()
-                .fill(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.2))
-                .frame(width: 42, height: 42)
+                .fill(AppTheme.accentBlueSoft)
+                .frame(width: 44, height: 44)
                 .overlay(
                     Image(systemName: "building.2.crop.circle.fill")
                         .font(.system(size: 20))
-                        .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                        .foregroundColor(AppTheme.accentBlue)
                 )
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("JOB LOCATION (APPLE MAPS)")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                    .foregroundColor(AppTheme.accentBlue)
 
                 Text(workLoc.name)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
@@ -349,7 +384,7 @@ struct HomeView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "arrow.triangle.turn.up.right.diamond.fill")
                         .font(.system(size: 12))
-                    Text("Navigate")
+                    Text("Maps")
                         .font(.system(size: 12, weight: .bold))
                 }
                 .foregroundColor(.white)
@@ -357,22 +392,26 @@ struct HomeView: View {
                 .padding(.vertical, 8)
                 .background(
                     Capsule()
-                        .fill(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                        .fill(AppTheme.accentBlue)
                 )
             }
         }
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(AppTheme.buttonPurple.opacity(0.7))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
     private var emptyBookingsCard: some View {
         VStack(spacing: 12) {
             Image(systemName: "calendar.badge.clock")
-                .font(.system(size: 36))
-                .foregroundColor(AppTheme.placeholderText)
+                .font(.system(size: 38))
+                .foregroundColor(AppTheme.placeholderText.opacity(0.8))
             Text("No Upcoming Carpool Bookings")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
@@ -381,13 +420,17 @@ struct HomeView: View {
                 .foregroundColor(AppTheme.placeholderText)
                 .multilineTextAlignment(.center)
 
-            Button(action: { dashboardVM.selectedTab = 1 }) {
+            Button(action: {
+                withAnimation {
+                    dashboardVM.selectedTab = 1
+                }
+            }) {
                 Text("Browse Open Rides")
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
+                    .background(AppTheme.accentBlue)
                     .cornerRadius(20)
             }
             .padding(.top, 4)
@@ -396,7 +439,11 @@ struct HomeView: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.buttonPurple.opacity(0.75))
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
         )
     }
 
@@ -404,7 +451,7 @@ struct HomeView: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
                 Circle()
-                    .fill(color.opacity(0.25))
+                    .fill(color.opacity(0.2))
                     .frame(width: 40, height: 40)
                     .overlay(
                         Image(systemName: icon)
@@ -426,7 +473,11 @@ struct HomeView: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(AppTheme.buttonPurple.opacity(0.85))
+                    .fill(AppTheme.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                    )
             )
         }
     }
@@ -455,27 +506,63 @@ struct HomeView: View {
             .frame(height: 50)
             .background(
                 RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                    .fill(AppTheme.buttonPurple)
+                    .fill(AppTheme.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                    )
             )
 
-            Text("Available Colleague Rides (\(dashboardVM.filteredRides.count))")
+            // Filter Pills
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(carpoolFilters, id: \.self) { filter in
+                        let isSelected = carpoolTimeFilter == filter
+                        Button(action: {
+                            withAnimation(.spring(response: 0.25)) {
+                                carpoolTimeFilter = filter
+                            }
+                        }) {
+                            Text(filter)
+                                .font(.system(size: 12, weight: isSelected ? .bold : .medium))
+                                .foregroundColor(isSelected ? .white : AppTheme.placeholderText)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 7)
+                                .background(
+                                    Capsule()
+                                        .fill(isSelected ? AppTheme.accentBlue : AppTheme.cardBackground)
+                                        .overlay(
+                                            Capsule().stroke(isSelected ? AppTheme.accentBlue : AppTheme.cardBorder, lineWidth: 1)
+                                        )
+                                )
+                        }
+                    }
+                }
+            }
+
+            let displayedRides = filteredRidesWithTime
+
+            Text("Available Colleague Rides (\(displayedRides.count))")
                 .font(.system(size: 15, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
                 .padding(.top, 4)
 
-            if dashboardVM.filteredRides.isEmpty {
+            if displayedRides.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "car.2.fill")
-                        .font(.system(size: 36))
+                        .font(.system(size: 38))
                         .foregroundColor(AppTheme.placeholderText)
-                    Text("No rides match '\(dashboardVM.searchQuery)'")
-                        .font(.system(size: 15, weight: .medium))
+                    Text("No rides match your filter")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(AppTheme.textLight)
+                    Text("Try adjusting your search query or time filter.")
+                        .font(.system(size: 13))
                         .foregroundColor(AppTheme.placeholderText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 40)
             } else {
-                ForEach(dashboardVM.filteredRides) { ride in
+                ForEach(displayedRides) { ride in
                     RideCardView(ride: ride) {
                         if ride.isUserBooked {
                             dashboardVM.cancelBooking(ride)
@@ -488,23 +575,38 @@ struct HomeView: View {
         }
     }
 
+    private var filteredRidesWithTime: [CommuteRide] {
+        let base = dashboardVM.filteredRides
+        if carpoolTimeFilter == "Morning (AM)" {
+            return base.filter { $0.departureTime.contains("AM") }
+        } else if carpoolTimeFilter == "Afternoon (PM)" {
+            return base.filter { $0.departureTime.contains("PM") }
+        }
+        return base
+    }
+
     // MARK: - Tab 2: Eco Impact
     private var ecoImpactTabContent: some View {
         VStack(spacing: 18) {
-            VStack(spacing: 14) {
+            VStack(spacing: 16) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Your Sustainability Impact")
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(Color(red: 0.4, green: 0.9, blue: 0.6))
+                        Text("YOUR SUSTAINABILITY IMPACT")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(AppTheme.ecoGreen)
                         Text("Green Commuter")
                             .font(.system(size: 22, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
                     }
                     Spacer()
-                    Image(systemName: "leaf.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(Color(red: 0.4, green: 0.9, blue: 0.6))
+                    Circle()
+                        .fill(AppTheme.ecoGreenSoft)
+                        .frame(width: 52, height: 52)
+                        .overlay(
+                            Image(systemName: "leaf.fill")
+                                .font(.system(size: 26))
+                                .foregroundColor(AppTheme.ecoGreen)
+                        )
                 }
 
                 Divider()
@@ -533,34 +635,92 @@ struct HomeView: View {
             .padding(20)
             .background(
                 RoundedRectangle(cornerRadius: 24)
-                    .fill(AppTheme.buttonPurple)
+                    .fill(AppTheme.cardBackground)
                     .overlay(
                         RoundedRectangle(cornerRadius: 24)
-                            .stroke(Color(red: 0.4, green: 0.9, blue: 0.6).opacity(0.3), lineWidth: 1)
+                            .stroke(AppTheme.ecoGreen.opacity(0.35), lineWidth: 1)
                     )
             )
 
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(spacing: 8) {
-                    Image(systemName: "gift.fill")
-                        .foregroundColor(Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0))
-                    Text("Company Commuter Rewards")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(AppTheme.textLight)
+            // Gamified Commuter Rewards
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(AppTheme.accentBlueSoft)
+                        .frame(width: 36, height: 36)
+                        .overlay(
+                            Image(systemName: "gift.fill")
+                                .font(.system(size: 16))
+                                .foregroundColor(AppTheme.accentBlue)
+                        )
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Company Commuter Rewards")
+                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .foregroundColor(AppTheme.textLight)
+                        Text("360 / 500 Credits to Next Perk Tier")
+                            .font(.system(size: 12))
+                            .foregroundColor(AppTheme.placeholderText)
+                    }
                 }
 
-                Text("You have accumulated 360 Corporate Commuter Credits! Redeemable for campus cafeteria passes and preferred EV parking spots.")
+                // Progress Bar
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.black.opacity(0.35))
+                            .frame(height: 8)
+
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [AppTheme.accentBlue, AppTheme.ecoGreen],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geo.size.width * (360.0 / 500.0), height: 8)
+                    }
+                }
+                .frame(height: 8)
+
+                Text("Redeem credits for campus cafeteria vouchers and preferred EV reserved parking spots.")
                     .font(.system(size: 13))
                     .foregroundColor(AppTheme.placeholderText)
                     .lineSpacing(3)
+
+                HStack(spacing: 8) {
+                    perkBadge(title: "Cafeteria $10 Pass", icon: "cup.and.saucer.fill")
+                    perkBadge(title: "Priority EV Spot", icon: "bolt.car.fill")
+                }
+                .padding(.top, 4)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 22)
-                    .fill(AppTheme.buttonPurple.opacity(0.7))
+                    .fill(AppTheme.cardBackground)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22)
+                            .stroke(AppTheme.cardBorder, lineWidth: 1)
+                    )
             )
         }
+    }
+
+    private func perkBadge(title: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.system(size: 11))
+                .foregroundColor(AppTheme.ecoGreen)
+            Text(title)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundColor(AppTheme.textLight)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(AppTheme.ecoGreenSoft)
+        .cornerRadius(10)
     }
 
     private func ecoStatItem(value: String, title: String, subtitle: String) -> some View {
@@ -571,7 +731,7 @@ struct HomeView: View {
 
             Text(title)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(AppTheme.textLight.opacity(0.9))
+                .foregroundColor(AppTheme.textLight.opacity(0.95))
 
             Text(subtitle)
                 .font(.system(size: 10))
@@ -579,8 +739,8 @@ struct HomeView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
-        .background(Color.black.opacity(0.25))
+        .padding(.vertical, 12)
+        .background(Color.black.opacity(0.28))
         .cornerRadius(16)
     }
 
@@ -621,13 +781,27 @@ struct HomeView: View {
                             showingDestinationPicker = true
                         }
 
-                        CustomTextField(placeholder: "Departure Time (e.g. 8:15 AM)", text: $dashboardVM.newRideTime)
-                        CustomTextField(placeholder: "Vehicle (Model & Color)", text: $dashboardVM.newRideVehicle)
+                        CustomTextField(
+                            placeholder: "Departure Time (e.g. 8:15 AM)",
+                            text: $dashboardVM.newRideTime,
+                            icon: "clock.fill"
+                        )
+
+                        CustomTextField(
+                            placeholder: "Vehicle (Model & Color)",
+                            text: $dashboardVM.newRideVehicle,
+                            icon: "car.side.fill",
+                            autocapitalization: .words
+                        )
 
                         HStack {
-                            Text("Available Seats:")
-                                .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(AppTheme.textLight)
+                            HStack(spacing: 8) {
+                                Image(systemName: "person.2.fill")
+                                    .foregroundColor(AppTheme.accentBlue)
+                                Text("Available Seats:")
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(AppTheme.textLight)
+                            }
 
                             Spacer()
 
@@ -638,12 +812,16 @@ struct HomeView: View {
                         .frame(height: AppTheme.buttonHeight)
                         .background(
                             RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
-                                .fill(AppTheme.buttonPurple)
+                                .fill(AppTheme.inputBackground)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                                )
                         )
                     }
                     .padding(.top, 8)
 
-                    PrimaryButton(title: "Publish Carpool Route") {
+                    PrimaryButton(title: "Publish Carpool Route", style: .accent) {
                         dashboardVM.newRideOrigin = selectedOriginLocation?.name ?? dashboardVM.newRideOrigin
                         dashboardVM.newRideDestination = selectedDestinationLocation?.name ?? dashboardVM.newRideDestination
                         dashboardVM.offerRide(
@@ -662,6 +840,7 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, AppTheme.horizontalPadding)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .presentationDetents([.medium, .large])
         .sheet(isPresented: $showingOriginPicker) {
