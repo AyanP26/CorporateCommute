@@ -76,7 +76,7 @@
         android:background="@drawable/bg_input_field"
         android:gravity="center"
         android:hint="@string/hint_password"
-        android:inputType="textPassword"
+        android:inputType="text"
         android:paddingHorizontal="20dp"
         android:textColor="@color/white"
         android:textColorHint="#D1D1D1"
