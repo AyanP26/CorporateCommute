@@ -2,12 +2,24 @@ import Foundation
 import Combine
 
 final class CommuteDashboardViewModel: ObservableObject {
-    @Published var selectedTab: Int = 0 // 0: Overview/My Rides, 1: Find Carpool, 2: Eco Impact
+    // Tabs: 0: Dashboard/Overview, 1: Find Carpool, 2: My Carpools
+    @Published var selectedTab: Int = 0
     @Published var searchQuery: String = ""
+
+    // Sheet Presentations
     @Published var showingOfferRideSheet: Bool = false
     @Published var showingIncomingRequestsSheet: Bool = false
     @Published var showingMyRequestsSheet: Bool = false
     @Published var selectedRideForDetails: CommuteRide? = nil
+    @Published var selectedChatRide: CommuteRide? = nil
+
+    // "My Carpools" Sub-Filter: 0: All, 1: Hosted by You, 2: Joined & Requested
+    @Published var myCarpoolsFilter: Int = 0
+
+    // "Find Carpool" Filters: 0: All, 1: Morning (AM), 2: Afternoon (PM)
+    @Published var selectedTimeFilter: Int = 0
+    // Date filter: 0: All Dates, 1: Today, 2: Tomorrow
+    @Published var selectedDateFilter: Int = 0
 
     // Requests Management (Parity with Android)
     @Published var incomingRequests: [RideRequest] = []
@@ -16,17 +28,13 @@ final class CommuteDashboardViewModel: ObservableObject {
     @Published var requestAlertMessage: String? = nil
     @Published var showRequestBanner: Bool = false
 
-    // Offer ride form fields
+    // Offer Ride Form Fields
     @Published var newRideOrigin: String = "West Suburbs Hub"
     @Published var newRideDestination: String = "Corporate HQ - Bldg 4"
-    @Published var newRideTime: String = "8:15 AM"
+    @Published var newRideDepartureDate: Date = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
     @Published var newRideVehicle: String = "Honda Civic (Silver)"
     @Published var newRideSeats: Int = 3
-
-    // Eco stats
-    @Published var totalRidesCompleted: Int = 18
-    @Published var totalCo2SavedKg: Double = 76.4
-    @Published var estimatedCostSavedDollars: Double = 142.50
+    @Published var newRideNotes: String = ""
 
     // Next scheduled ride for the user
     @Published var nextRide: CommuteRide? = nil
@@ -37,6 +45,25 @@ final class CommuteDashboardViewModel: ObservableObject {
     private let rideService: RideServiceProtocol
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: - Formatters
+    static let timeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        return formatter
+    }()
+
+    static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
+
+    static let shortDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, MMM d"
+        return formatter
+    }()
+
     init(rideService: RideServiceProtocol = FirebaseManager.shared.rideService) {
         self.rideService = rideService
 
@@ -46,7 +73,6 @@ final class CommuteDashboardViewModel: ObservableObject {
             .sink { [weak self] rides in
                 guard let self = self else { return }
                 self.availableRides = rides
-                // Update nextRide if user is booked
                 if let booked = rides.first(where: { $0.isUserBooked }) {
                     self.nextRide = booked
                 }
@@ -91,7 +117,6 @@ final class CommuteDashboardViewModel: ObservableObject {
                 self.requestAlertMessage = "Ride request sent to \(ride.driverName)! 🚗"
                 self.showRequestBanner = true
 
-                // Auto hide banner after 3 seconds
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                     self.showRequestBanner = false
                 }
@@ -109,7 +134,6 @@ final class CommuteDashboardViewModel: ObservableObject {
                 if let idx = self.incomingRequests.firstIndex(where: { $0.requestId == request.requestId }) {
                     self.incomingRequests[idx].status = .accepted
                 }
-                // Also decrement available seats locally if corresponding ride exists
                 if let rideIdx = self.availableRides.firstIndex(where: { $0.id == request.rideId }), self.availableRides[rideIdx].availableSeats > 0 {
                     self.availableRides[rideIdx].availableSeats -= 1
                 }
@@ -146,15 +170,48 @@ final class CommuteDashboardViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Find Carpool Filtering
     var filteredRides: [CommuteRide] {
-        if searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
-            return availableRides
+        var result = availableRides
+
+        // Text search
+        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !query.isEmpty {
+            result = result.filter { ride in
+                ride.origin.localizedCaseInsensitiveContains(query) ||
+                ride.destination.localizedCaseInsensitiveContains(query) ||
+                ride.driverName.localizedCaseInsensitiveContains(query) ||
+                ride.driverDepartment.localizedCaseInsensitiveContains(query)
+            }
         }
+
+        // Time of day filter
+        if selectedTimeFilter == 1 {
+            result = result.filter { $0.departureTime.uppercased().contains("AM") }
+        } else if selectedTimeFilter == 2 {
+            result = result.filter { $0.departureTime.uppercased().contains("PM") }
+        }
+
+        return result
+    }
+
+    // MARK: - "My Carpools" Organization
+    func ridesHostedBy(userId: String) -> [CommuteRide] {
+        let uid = userId.trimmingCharacters(in: .whitespacesAndNewlines)
         return availableRides.filter { ride in
-            ride.origin.localizedCaseInsensitiveContains(searchQuery) ||
-            ride.destination.localizedCaseInsensitiveContains(searchQuery) ||
-            ride.driverName.localizedCaseInsensitiveContains(searchQuery) ||
-            ride.driverDepartment.localizedCaseInsensitiveContains(searchQuery)
+            if !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user") {
+                return true
+            }
+            return false
+        }
+    }
+
+    func ridesJoinedBy(userId: String) -> [CommuteRide] {
+        let uid = userId.trimmingCharacters(in: .whitespacesAndNewlines)
+        return availableRides.filter { ride in
+            let isDriver = !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user")
+            guard !isDriver else { return false }
+            return ride.isUserBooked || requestedRideIds.contains(ride.id)
         }
     }
 
@@ -162,15 +219,7 @@ final class CommuteDashboardViewModel: ObservableObject {
         availableRides.filter { $0.isUserBooked }
     }
 
-    var totalRidesTaken: Int {
-        totalRidesCompleted
-    }
-
-    var totalSeatsShared: Int {
-        totalRidesCompleted * 2
-    }
-
-    func bookRide(_ ride: CommuteRide, userId: String = "current_user") {
+    func bookRide(_ ride: CommuteRide, userId: String) {
         Task { @MainActor in
             do {
                 try await rideService.bookRide(rideId: ride.id, userId: userId)
@@ -187,7 +236,7 @@ final class CommuteDashboardViewModel: ObservableObject {
         }
     }
 
-    func cancelBooking(_ ride: CommuteRide, userId: String = "current_user") {
+    func cancelBooking(_ ride: CommuteRide, userId: String) {
         Task { @MainActor in
             do {
                 try await rideService.cancelBooking(rideId: ride.id, userId: userId)
@@ -204,18 +253,22 @@ final class CommuteDashboardViewModel: ObservableObject {
         }
     }
 
-    func offerRide(driverName: String, department: String, userId: String = "current_user") {
+    func offerRide(driverId: String, driverName: String, department: String) {
+        let formattedTime = Self.timeFormatter.string(from: newRideDepartureDate)
+        let formattedDate = Self.shortDateFormatter.string(from: newRideDepartureDate)
+
         let createdRide = CommuteRide(
-            driverId: userId,
+            driverId: driverId.isEmpty ? "current_user" : driverId,
             driverName: driverName.isEmpty ? "You (Driver)" : driverName,
             driverDepartment: department.isEmpty ? "Corporate Team" : department,
-            vehicleDescription: newRideVehicle,
+            vehicleDescription: newRideVehicle.isEmpty ? "Vehicle" : newRideVehicle,
             origin: newRideOrigin,
             destination: newRideDestination,
-            departureTime: newRideTime,
+            departureDate: formattedDate,
+            departureTime: formattedTime,
             availableSeats: newRideSeats,
             totalSeats: newRideSeats + 1,
-            co2SavedKg: 5.0,
+            notes: newRideNotes,
             status: .scheduled,
             isUserBooked: true
         )

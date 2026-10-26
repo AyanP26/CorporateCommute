@@ -160,4 +160,52 @@ final class MockRideService: RideServiceProtocol {
             }
         }
     }
+
+    // MARK: - Carpool Group Chat (Mock)
+    private var chatMessagesByRideId: [String: [CarpoolChatMessage]] = [
+        "mock_ride_1": [
+            CarpoolChatMessage(
+                rideId: "mock_ride_1",
+                senderId: "mock_driver_1",
+                senderName: "Sarah Chen",
+                text: "Good morning team! Heading out from West Hub at 8:15 AM sharp.",
+                timestamp: Date().addingTimeInterval(-1800)
+            ),
+            CarpoolChatMessage(
+                rideId: "mock_ride_1",
+                senderId: "mock_user_2",
+                senderName: "David Miller",
+                text: "Sounds great Sarah! I'll be waiting by the East transit island.",
+                timestamp: Date().addingTimeInterval(-1200)
+            )
+        ]
+    ]
+
+    func fetchMessages(for rideId: String) async throws -> [CarpoolChatMessage] {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        return chatMessagesByRideId[rideId] ?? []
+    }
+
+    func sendMessage(rideId: String, text: String, sender: User) async throws -> CarpoolChatMessage {
+        let msg = CarpoolChatMessage(
+            rideId: rideId,
+            senderId: sender.id,
+            senderName: sender.name,
+            senderEmail: sender.email,
+            text: text,
+            timestamp: Date(),
+            isCurrentUser: true
+        )
+        if chatMessagesByRideId[rideId] == nil {
+            chatMessagesByRideId[rideId] = []
+        }
+        chatMessagesByRideId[rideId]?.append(msg)
+        return msg
+    }
+
+    func observeMessages(for rideId: String, onUpdate: @escaping ([CarpoolChatMessage]) -> Void) -> (() -> Void)? {
+        let current = chatMessagesByRideId[rideId] ?? []
+        onUpdate(current)
+        return nil
+    }
 }

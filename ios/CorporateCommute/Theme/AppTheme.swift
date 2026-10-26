@@ -16,6 +16,7 @@ enum AppTheme {
     // Accent Highlights
     static let accentBlue = Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0)
     static let accentBlueSoft = Color(red: 0x15 / 255.0, green: 0x72 / 255.0, blue: 0xE8 / 255.0).opacity(0.2)
+    static let accentPurple = Color(red: 0x9B / 255.0, green: 0x51 / 255.0, blue: 0xE0 / 255.0)
     static let ecoGreen = Color(red: 0x4E / 255.0, green: 0xD8 / 255.0, blue: 0x91 / 255.0)
     static let ecoGreenSoft = Color(red: 0x4E / 255.0, green: 0xD8 / 255.0, blue: 0x91 / 255.0).opacity(0.18)
     static let errorRed = Color(red: 1.0, green: 0.38, blue: 0.38)
@@ -24,5 +25,6 @@ enum AppTheme {
     // Metrics (matching Android ConstraintLayout dp values)
     static let buttonHeight: CGFloat = 56
     static let pillCornerRadius: CGFloat = 28
+    static let cardCornerRadius: CGFloat = 22
     static let horizontalPadding: CGFloat = 32
 }

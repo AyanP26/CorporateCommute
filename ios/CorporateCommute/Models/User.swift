@@ -56,6 +56,13 @@ struct User: Identifiable, Codable, Equatable {
         self.notificationsEnabled = notificationsEnabled
     }
 
+    var firstName: String {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return "Commuter" }
+        let parts = trimmed.components(separatedBy: " ")
+        return parts.first(where: { !$0.isEmpty }) ?? trimmed
+    }
+
     // Firestore Dictionary Representation
     var dictionaryRepresentation: [String: Any] {
         var dict: [String: Any] = [

@@ -7,7 +7,7 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var showingLogoutConfirmation = false
 
-    // Quick Carpool Filter
+    // Quick Carpool Filters for Find Carpool tab
     @State private var carpoolTimeFilter: String = "All"
     private let carpoolFilters = ["All", "Morning (AM)", "Afternoon (PM)"]
 
@@ -16,6 +16,18 @@ struct HomeView: View {
     @State private var showingDestinationPicker = false
     @State private var selectedOriginLocation: CommuteLocation?
     @State private var selectedDestinationLocation: CommuteLocation?
+
+    private var currentUserId: String {
+        authViewModel.currentUser?.id ?? "current_user"
+    }
+
+    private var greetingFirstName: String {
+        guard let name = authViewModel.currentUser?.name.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
+            return "Commuter"
+        }
+        let parts = name.components(separatedBy: " ")
+        return parts.first(where: { !$0.isEmpty }) ?? name
+    }
 
     var body: some View {
         NavigationStack {
@@ -43,7 +55,7 @@ struct HomeView: View {
                             case 1:
                                 findCarpoolTabContent
                             default:
-                                ecoImpactTabContent
+                                myCarpoolsTabContent
                             }
                         }
                         .padding(.horizontal, AppTheme.horizontalPadding)
@@ -64,6 +76,12 @@ struct HomeView: View {
             }
             .sheet(isPresented: $dashboardVM.showingMyRequestsSheet) {
                 MyRequestsView(dashboardVM: dashboardVM)
+            }
+            .sheet(item: $dashboardVM.selectedChatRide) { ride in
+                CarpoolChatView(
+                    ride: ride,
+                    currentUser: authViewModel.currentUser ?? User(name: "Commuter", email: "")
+                )
             }
             .overlay(alignment: .top) {
                 if dashboardVM.showRequestBanner, let msg = dashboardVM.requestAlertMessage {
@@ -116,7 +134,7 @@ struct HomeView: View {
                             ))
                             .frame(width: 44, height: 44)
                             .overlay(
-                                Text(String(authViewModel.currentUser?.name.prefix(1) ?? "C").uppercased())
+                                Text(String(greetingFirstName.prefix(1)).uppercased())
                                     .font(.system(size: 18, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
                             )
@@ -129,7 +147,7 @@ struct HomeView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Hi, \(authViewModel.currentUser?.name ?? "Commuter")")
+                        Text("Hi, \(greetingFirstName)")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
 
@@ -197,7 +215,7 @@ struct HomeView: View {
         HStack(spacing: 6) {
             tabButton(title: "My Commute", index: 0)
             tabButton(title: "Find Carpool", index: 1)
-            tabButton(title: "Eco Stats", index: 2)
+            tabButton(title: "My Carpools", index: 2)
         }
         .padding(4)
         .background(Color.black.opacity(0.35))
@@ -226,7 +244,7 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Tab 0: My Commute
+    // MARK: - Tab 0: My Commute (Dashboard)
     private var myCommuteTabContent: some View {
         VStack(spacing: 16) {
             // Next Commute Card
@@ -299,8 +317,15 @@ struct HomeView: View {
                     emptyBookingsCard
                 } else {
                     ForEach(dashboardVM.bookedRides) { ride in
-                        RideCardView(ride: ride) {
-                            dashboardVM.cancelBooking(ride)
+                        let isHost = ride.driverId == currentUserId
+                        RideCardView(
+                            ride: ride,
+                            isHost: isHost,
+                            onChat: {
+                                dashboardVM.selectedChatRide = ride
+                            }
+                        ) {
+                            dashboardVM.cancelBooking(ride, userId: currentUserId)
                         }
                     }
                 }
@@ -322,13 +347,32 @@ struct HomeView: View {
                         .foregroundColor(AppTheme.ecoGreen)
                 }
                 Spacer()
-                Text("Confirmed")
-                    .font(.system(size: 12, weight: .bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(AppTheme.ecoGreenSoft)
-                    .foregroundColor(AppTheme.ecoGreen)
-                    .cornerRadius(8)
+
+                if let next = dashboardVM.nextRide {
+                    Button(action: {
+                        dashboardVM.selectedChatRide = next
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "bubble.left.and.bubble.right.fill")
+                                .font(.system(size: 11))
+                            Text("Carpool Chat")
+                                .font(.system(size: 11, weight: .bold))
+                        }
+                        .foregroundColor(AppTheme.accentBlue)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(AppTheme.accentBlueSoft)
+                        .clipShape(Capsule())
+                    }
+                } else {
+                    Text("Confirmed")
+                        .font(.system(size: 12, weight: .bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(AppTheme.ecoGreenSoft)
+                        .foregroundColor(AppTheme.ecoGreen)
+                        .cornerRadius(8)
+                }
             }
 
             HStack(alignment: .top, spacing: 14) {
@@ -353,16 +397,16 @@ struct HomeView: View {
 
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(authViewModel.currentUser?.homeLocation?.name ?? "Home")
+                        Text(dashboardVM.nextRide?.origin ?? authViewModel.currentUser?.homeLocation?.name ?? "Home")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
-                        Text("Departure 8:15 AM")
+                        Text("Departure \(dashboardVM.nextRide?.departureTime ?? "8:15 AM")")
                             .font(.system(size: 12))
                             .foregroundColor(AppTheme.placeholderText)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(authViewModel.currentUser?.workLocation?.name ?? authViewModel.currentUser?.officeLocation ?? "Corporate HQ - Innovation Campus")
+                        Text(dashboardVM.nextRide?.destination ?? authViewModel.currentUser?.workLocation?.name ?? "Corporate HQ")
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
                             .lineLimit(1)
@@ -380,12 +424,12 @@ struct HomeView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "car.side.fill")
                         .foregroundColor(AppTheme.accentBlue)
-                    Text("Tesla Model 3 • Blue")
+                    Text(dashboardVM.nextRide?.vehicleDescription ?? "Corporate Carpool")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundColor(AppTheme.textLight)
                 }
                 Spacer()
-                Text("2 colleagues joining")
+                Text("Driver: \(dashboardVM.nextRide?.driverName ?? "You")")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(AppTheme.placeholderText)
             }
@@ -470,7 +514,7 @@ struct HomeView: View {
             Text("No Upcoming Carpool Bookings")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
-            Text("Find open carpools from teammates or offer your own route to start earning eco credits.")
+            Text("Find open carpools from teammates or offer your own route to start carpooling.")
                 .font(.system(size: 13))
                 .foregroundColor(AppTheme.placeholderText)
                 .multilineTextAlignment(.center)
@@ -604,7 +648,7 @@ struct HomeView: View {
                                         .overlay(
                                             Capsule().stroke(isSelected ? AppTheme.accentBlue : AppTheme.cardBorder, lineWidth: 1)
                                         )
-                                )
+                                    )
                         }
                     }
                 }
@@ -633,9 +677,16 @@ struct HomeView: View {
                 .padding(.vertical, 40)
             } else {
                 ForEach(displayedRides) { ride in
-                    RideCardView(ride: ride) {
+                    let isHost = ride.driverId == currentUserId
+                    RideCardView(
+                        ride: ride,
+                        isHost: isHost,
+                        onChat: (ride.isUserBooked || isHost) ? {
+                            dashboardVM.selectedChatRide = ride
+                        } : nil
+                    ) {
                         if ride.isUserBooked {
-                            dashboardVM.cancelBooking(ride)
+                            dashboardVM.cancelBooking(ride, userId: currentUserId)
                         } else if ride.hasPendingRequest {
                             dashboardVM.requestAlertMessage = "Your request is already pending driver approval."
                             withAnimation { dashboardVM.showRequestBanner = true }
@@ -646,7 +697,7 @@ struct HomeView: View {
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                             dashboardVM.sendRideRequest(ride: ride, user: user)
                         } else {
-                            dashboardVM.bookRide(ride)
+                            dashboardVM.bookRide(ride, userId: currentUserId)
                         }
                     }
                 }
@@ -657,173 +708,182 @@ struct HomeView: View {
     private var filteredRidesWithTime: [CommuteRide] {
         let base = dashboardVM.filteredRides
         if carpoolTimeFilter == "Morning (AM)" {
-            return base.filter { $0.departureTime.contains("AM") }
+            return base.filter { $0.departureTime.uppercased().contains("AM") }
         } else if carpoolTimeFilter == "Afternoon (PM)" {
-            return base.filter { $0.departureTime.contains("PM") }
+            return base.filter { $0.departureTime.uppercased().contains("PM") }
         }
         return base
     }
 
-    // MARK: - Tab 2: Eco Impact
-    private var ecoImpactTabContent: some View {
-        VStack(spacing: 18) {
-            VStack(spacing: 16) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("YOUR SUSTAINABILITY IMPACT")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(AppTheme.ecoGreen)
-                        Text("Green Commuter")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(AppTheme.textLight)
-                    }
-                    Spacer()
-                    Circle()
-                        .fill(AppTheme.ecoGreenSoft)
-                        .frame(width: 52, height: 52)
-                        .overlay(
-                            Image(systemName: "leaf.fill")
-                                .font(.system(size: 26))
-                                .foregroundColor(AppTheme.ecoGreen)
-                        )
-                }
+    // MARK: - Tab 2: My Carpools (Organized Hub)
+    private var myCarpoolsTabContent: some View {
+        let hostedRides = dashboardVM.ridesHostedBy(userId: currentUserId)
+        let joinedRides = dashboardVM.ridesJoinedBy(userId: currentUserId)
 
-                Divider()
-                    .background(Color.white.opacity(0.12))
-
-                HStack(spacing: 12) {
-                    ecoStatItem(
-                        value: "\(Int(dashboardVM.totalCo2SavedKg)) kg",
-                        title: "CO₂ Offset",
-                        subtitle: "≈ 3.8 trees planted"
-                    )
-
-                    ecoStatItem(
-                        value: "\(dashboardVM.totalRidesTaken)",
-                        title: "Shared Trips",
-                        subtitle: "Carpools taken"
-                    )
-
-                    ecoStatItem(
-                        value: "\(dashboardVM.totalSeatsShared)",
-                        title: "Seats Shared",
-                        subtitle: "Traffic relieved"
-                    )
-                }
+        return VStack(alignment: .leading, spacing: 18) {
+            // Sub-category Filter Selector
+            HStack(spacing: 8) {
+                myCarpoolsFilterButton(title: "All (\(hostedRides.count + joinedRides.count))", index: 0)
+                myCarpoolsFilterButton(title: "Hosted by You (\(hostedRides.count))", index: 1)
+                myCarpoolsFilterButton(title: "Joined / Sent (\(joinedRides.count))", index: 2)
             }
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 24)
-                    .fill(AppTheme.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .stroke(AppTheme.ecoGreen.opacity(0.35), lineWidth: 1)
-                    )
+            .padding(4)
+            .background(Color.black.opacity(0.35))
+            .cornerRadius(AppTheme.pillCornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
             )
 
-            // Gamified Commuter Rewards
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(spacing: 10) {
-                    Circle()
-                        .fill(AppTheme.accentBlueSoft)
-                        .frame(width: 36, height: 36)
-                        .overlay(
-                            Image(systemName: "gift.fill")
-                                .font(.system(size: 16))
+            // Section 1: Rides You Are Hosting
+            if dashboardVM.myCarpoolsFilter == 0 || dashboardVM.myCarpoolsFilter == 1 {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Image(systemName: "steeringwheel")
                                 .foregroundColor(AppTheme.accentBlue)
-                        )
+                            Text("Carpools You're Driving")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(AppTheme.textLight)
+                        }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Company Commuter Rewards")
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
-                            .foregroundColor(AppTheme.textLight)
-                        Text("360 / 500 Credits to Next Perk Tier")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppTheme.placeholderText)
+                        Spacer()
+
+                        Text("\(hostedRides.count)")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(AppTheme.accentBlue)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(AppTheme.accentBlueSoft)
+                            .clipShape(Capsule())
+                    }
+
+                    if hostedRides.isEmpty {
+                        emptyCarpoolsCard(
+                            title: "You haven't posted any carpools",
+                            subtitle: "Share your commute route with colleagues heading to the same campus.",
+                            buttonTitle: "Offer a Carpool"
+                        ) {
+                            dashboardVM.showingOfferRideSheet = true
+                        }
+                    } else {
+                        ForEach(hostedRides) { ride in
+                            RideCardView(
+                                ride: ride,
+                                isHost: true,
+                                onChat: {
+                                    dashboardVM.selectedChatRide = ride
+                                }
+                            ) {}
+                        }
                     }
                 }
-
-                // Progress Bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color.black.opacity(0.35))
-                            .frame(height: 8)
-
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [AppTheme.accentBlue, AppTheme.ecoGreen],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: geo.size.width * (360.0 / 500.0), height: 8)
-                    }
-                }
-                .frame(height: 8)
-
-                Text("Redeem credits for campus cafeteria vouchers and preferred EV reserved parking spots.")
-                    .font(.system(size: 13))
-                    .foregroundColor(AppTheme.placeholderText)
-                    .lineSpacing(3)
-
-                HStack(spacing: 8) {
-                    perkBadge(title: "Cafeteria $10 Pass", icon: "cup.and.saucer.fill")
-                    perkBadge(title: "Priority EV Spot", icon: "bolt.car.fill")
-                }
-                .padding(.top, 4)
             }
-            .padding(20)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 22)
-                    .fill(AppTheme.cardBackground)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22)
-                            .stroke(AppTheme.cardBorder, lineWidth: 1)
-                    )
-            )
+
+            // Section 2: Carpools You've Joined or Requested
+            if dashboardVM.myCarpoolsFilter == 0 || dashboardVM.myCarpoolsFilter == 2 {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Image(systemName: "person.crop.circle.badge.checkmark")
+                                .foregroundColor(AppTheme.ecoGreen)
+                            Text("Carpools You've Joined")
+                                .font(.system(size: 16, weight: .bold, design: .rounded))
+                                .foregroundColor(AppTheme.textLight)
+                        }
+
+                        Spacer()
+
+                        Text("\(joinedRides.count)")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(AppTheme.ecoGreen)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(AppTheme.ecoGreenSoft)
+                            .clipShape(Capsule())
+                    }
+
+                    if joinedRides.isEmpty {
+                        emptyCarpoolsCard(
+                            title: "No joined carpools yet",
+                            subtitle: "Search available colleague rides and request to reserve a seat.",
+                            buttonTitle: "Find a Carpool"
+                        ) {
+                            withAnimation {
+                                dashboardVM.selectedTab = 1
+                            }
+                        }
+                    } else {
+                        ForEach(joinedRides) { ride in
+                            RideCardView(
+                                ride: ride,
+                                isHost: false,
+                                onChat: {
+                                    dashboardVM.selectedChatRide = ride
+                                }
+                            ) {
+                                dashboardVM.cancelBooking(ride, userId: currentUserId)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    private func perkBadge(title: String, icon: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 11))
-                .foregroundColor(AppTheme.ecoGreen)
+    private func myCarpoolsFilterButton(title: String, index: Int) -> some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                dashboardVM.myCarpoolsFilter = index
+            }
+        }) {
             Text(title)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundColor(AppTheme.textLight)
+                .font(.system(size: 12, weight: dashboardVM.myCarpoolsFilter == index ? .bold : .medium))
+                .foregroundColor(dashboardVM.myCarpoolsFilter == index ? .white : AppTheme.placeholderText)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                        .fill(dashboardVM.myCarpoolsFilter == index ? AppTheme.accentBlue : Color.clear)
+                )
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(AppTheme.ecoGreenSoft)
-        .cornerRadius(10)
     }
 
-    private func ecoStatItem(value: String, title: String, subtitle: String) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundColor(AppTheme.textLight)
-
+    private func emptyCarpoolsCard(title: String, subtitle: String, buttonTitle: String, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 10) {
             Text(title)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(AppTheme.textLight.opacity(0.95))
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(AppTheme.textLight)
 
             Text(subtitle)
-                .font(.system(size: 10))
+                .font(.system(size: 12))
                 .foregroundColor(AppTheme.placeholderText)
                 .multilineTextAlignment(.center)
+
+            Button(action: action) {
+                Text(buttonTitle)
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(AppTheme.accentBlue)
+                    .clipShape(Capsule())
+            }
+            .padding(.top, 4)
         }
+        .padding(20)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.black.opacity(0.28))
-        .cornerRadius(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
+        )
     }
 
-    // MARK: - Offer Ride Sheet (Apple Maps Integrated)
+    // MARK: - Offer Ride Sheet (Apple Maps & Native Date/Time Pickers)
     private var offerRideSheet: some View {
         ZStack {
             BackgroundGradient()
@@ -841,7 +901,7 @@ struct HomeView: View {
                         .multilineTextAlignment(.center)
 
                     VStack(spacing: 16) {
-                        // Apple Maps Location Pickers
+                        // Departure Location (Apple Maps)
                         LocationRowView(
                             icon: "mappin.and.ellipse",
                             label: "Departure Location (Apple Maps)",
@@ -851,6 +911,7 @@ struct HomeView: View {
                             showingOriginPicker = true
                         }
 
+                        // Destination (Apple Maps)
                         LocationRowView(
                             icon: "building.2.fill",
                             label: "Office Destination (Apple Maps)",
@@ -860,12 +921,10 @@ struct HomeView: View {
                             showingDestinationPicker = true
                         }
 
-                        CustomTextField(
-                            placeholder: "Departure Time (e.g. 8:15 AM)",
-                            text: $dashboardVM.newRideTime,
-                            icon: "clock.fill"
-                        )
+                        // Schedule Departure (Date & Time Card)
+                        scheduleDepartureCard
 
+                        // Vehicle Info
                         CustomTextField(
                             placeholder: "Vehicle (Model & Color)",
                             text: $dashboardVM.newRideVehicle,
@@ -873,6 +932,7 @@ struct HomeView: View {
                             autocapitalization: .words
                         )
 
+                        // Seats Stepper
                         HStack {
                             HStack(spacing: 8) {
                                 Image(systemName: "person.2.fill")
@@ -897,6 +957,13 @@ struct HomeView: View {
                                         .stroke(Color.white.opacity(0.1), lineWidth: 1)
                                 )
                         )
+
+                        // Optional Trip Notes
+                        CustomTextField(
+                            placeholder: "Trip notes (e.g. coffee stop, music playlist)",
+                            text: $dashboardVM.newRideNotes,
+                            icon: "note.text"
+                        )
                     }
                     .padding(.top, 8)
 
@@ -904,6 +971,7 @@ struct HomeView: View {
                         dashboardVM.newRideOrigin = selectedOriginLocation?.name ?? dashboardVM.newRideOrigin
                         dashboardVM.newRideDestination = selectedDestinationLocation?.name ?? dashboardVM.newRideDestination
                         dashboardVM.offerRide(
+                            driverId: currentUserId,
                             driverName: authViewModel.currentUser?.name ?? "You",
                             department: authViewModel.currentUser?.company ?? "Corporate"
                         )
@@ -939,6 +1007,142 @@ struct HomeView: View {
                 self.selectedDestinationLocation = newDest
                 self.dashboardVM.newRideDestination = newDest.name
             }
+        }
+    }
+
+    // MARK: - Schedule Departure Card
+    private var scheduleDepartureCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "calendar.badge.clock")
+                    .foregroundColor(AppTheme.accentBlue)
+                    .font(.system(size: 16))
+
+                Text("Departure Schedule")
+                    .font(.system(size: 15, weight: .bold, design: .rounded))
+                    .foregroundColor(AppTheme.textLight)
+
+                Spacer()
+
+                Text(CommuteDashboardViewModel.shortDateFormatter.string(from: dashboardVM.newRideDepartureDate))
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(AppTheme.accentBlue)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(AppTheme.accentBlueSoft)
+                    .clipShape(Capsule())
+            }
+
+            // Quick Preset Chips
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    quickSchedulePreset(title: "Today", isSelected: Calendar.current.isDateInToday(dashboardVM.newRideDepartureDate)) {
+                        let cal = Calendar.current
+                        let hour = cal.component(.hour, from: dashboardVM.newRideDepartureDate)
+                        let minute = cal.component(.minute, from: dashboardVM.newRideDepartureDate)
+                        if let todayDate = cal.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) {
+                            dashboardVM.newRideDepartureDate = todayDate
+                        }
+                    }
+
+                    quickSchedulePreset(title: "Tomorrow", isSelected: Calendar.current.isDateInTomorrow(dashboardVM.newRideDepartureDate)) {
+                        let cal = Calendar.current
+                        if let tomorrow = cal.date(byAdding: .day, value: 1, to: Date()) {
+                            let hour = cal.component(.hour, from: dashboardVM.newRideDepartureDate)
+                            let minute = cal.component(.minute, from: dashboardVM.newRideDepartureDate)
+                            if let tomorrowDate = cal.date(bySettingHour: hour, minute: minute, second: 0, of: tomorrow) {
+                                dashboardVM.newRideDepartureDate = tomorrowDate
+                            }
+                        }
+                    }
+
+                    quickSchedulePreset(title: "8:00 AM", isSelected: false) {
+                        setTimePreset(hour: 8, minute: 0)
+                    }
+
+                    quickSchedulePreset(title: "8:30 AM", isSelected: false) {
+                        setTimePreset(hour: 8, minute: 30)
+                    }
+
+                    quickSchedulePreset(title: "5:00 PM", isSelected: false) {
+                        setTimePreset(hour: 17, minute: 0)
+                    }
+
+                    quickSchedulePreset(title: "5:30 PM", isSelected: false) {
+                        setTimePreset(hour: 17, minute: 30)
+                    }
+                }
+            }
+
+            Divider()
+                .background(Color.white.opacity(0.1))
+
+            // Native Date & Time Pickers
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "calendar")
+                        .foregroundColor(AppTheme.placeholderText)
+                        .font(.system(size: 13))
+
+                    DatePicker(
+                        "Date",
+                        selection: $dashboardVM.newRideDepartureDate,
+                        in: Date()...,
+                        displayedComponents: [.date]
+                    )
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                }
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    Image(systemName: "clock")
+                        .foregroundColor(AppTheme.placeholderText)
+                        .font(.system(size: 13))
+
+                    DatePicker(
+                        "Time",
+                        selection: $dashboardVM.newRideDepartureDate,
+                        displayedComponents: [.hourAndMinute]
+                    )
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius)
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
+        )
+    }
+
+    private func quickSchedulePreset(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 12, weight: isSelected ? .bold : .medium))
+                .foregroundColor(isSelected ? .white : AppTheme.placeholderText)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? AppTheme.accentBlue : Color.white.opacity(0.06))
+                        .overlay(
+                            Capsule().stroke(isSelected ? AppTheme.accentBlue : Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                )
+        }
+    }
+
+    private func setTimePreset(hour: Int, minute: Int) {
+        let cal = Calendar.current
+        if let updated = cal.date(bySettingHour: hour, minute: minute, second: 0, of: dashboardVM.newRideDepartureDate) {
+            dashboardVM.newRideDepartureDate = updated
         }
     }
 

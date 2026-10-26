@@ -41,6 +41,8 @@
 		A2B1C101 /* RideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C101 /* RideRequest.swift */; };
 		A2B1C102 /* ManageRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C102 /* ManageRequestsView.swift */; };
 		A2B1C103 /* MyRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C103 /* MyRequestsView.swift */; };
+		A3B1C101 /* CarpoolChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F1C101 /* CarpoolChatMessage.swift */; };
+		A3B1C102 /* CarpoolChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3F1C102 /* CarpoolChatView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +81,8 @@
 		A2F1C101 /* RideRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideRequest.swift; sourceTree = "<group>"; };
 		A2F1C102 /* ManageRequestsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageRequestsView.swift; sourceTree = "<group>"; };
 		A2F1C103 /* MyRequestsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyRequestsView.swift; sourceTree = "<group>"; };
+		A3F1C101 /* CarpoolChatMessage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CarpoolChatMessage.swift; sourceTree = "<group>"; };
+		A3F1C102 /* CarpoolChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CarpoolChatView.swift; sourceTree = "<group>"; };
 		FD00863D079807B208F10234 /* RideServiceProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideServiceProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,8 +146,17 @@
 				3E0047BCAE49B474E77CE0E5 /* Main */,
 				A1F1C100 /* Settings */,
 				A2F1C100 /* Requests */,
+				A3F1C100 /* Chat */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A3F1C100 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				A3F1C102 /* CarpoolChatView.swift */,
+			);
+			path = Chat;
 			sourceTree = "<group>";
 		};
 		A2F1C100 /* Requests */ = {
@@ -260,6 +273,7 @@
 				F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */,
 				A1F1C101 /* CommuteLocation.swift */,
 				A2F1C101 /* RideRequest.swift */,
+				A3F1C101 /* CarpoolChatMessage.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -390,6 +404,8 @@
 				A2B1C101 /* RideRequest.swift in Sources */,
 				A2B1C102 /* ManageRequestsView.swift in Sources */,
 				A2B1C103 /* MyRequestsView.swift in Sources */,
+				A3B1C101 /* CarpoolChatMessage.swift in Sources */,
+				A3B1C102 /* CarpoolChatView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

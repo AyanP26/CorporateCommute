@@ -227,4 +227,116 @@ final class FirestoreRideService: RideServiceProtocol {
         }
         #endif
     }
+
+    // MARK: - Carpool Group Chat
+    func fetchMessages(for rideId: String) async throws -> [CarpoolChatMessage] {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        let snapshot = try await db.collection("rides")
+            .document(rideId)
+            .collection("messages")
+            .order(by: "timestamp", descending: false)
+            .getDocuments()
+
+        return snapshot.documents.compactMap { doc -> CarpoolChatMessage? in
+            let data = doc.data()
+            let senderId = data["senderId"] as? String ?? ""
+            let senderName = data["senderName"] as? String ?? "Colleague"
+            let senderEmail = data["senderEmail"] as? String ?? ""
+            let text = data["text"] as? String ?? ""
+            let ts: Date
+            if let firestoreTs = data["timestamp"] as? Timestamp {
+                ts = firestoreTs.dateValue()
+            } else if let seconds = data["timestamp"] as? Double {
+                ts = Date(timeIntervalSince1970: seconds)
+            } else {
+                ts = Date()
+            }
+            return CarpoolChatMessage(
+                id: doc.documentID,
+                rideId: rideId,
+                senderId: senderId,
+                senderName: senderName,
+                senderEmail: senderEmail,
+                text: text,
+                timestamp: ts
+            )
+        }
+        #else
+        return []
+        #endif
+    }
+
+    func sendMessage(rideId: String, text: String, sender: User) async throws -> CarpoolChatMessage {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        let msgRef = db.collection("rides").document(rideId).collection("messages").document()
+        let now = Date()
+        let data: [String: Any] = [
+            "id": msgRef.documentID,
+            "rideId": rideId,
+            "senderId": sender.id,
+            "senderName": sender.name,
+            "senderEmail": sender.email,
+            "text": text,
+            "timestamp": Timestamp(date: now)
+        ]
+        try await msgRef.setData(data)
+        return CarpoolChatMessage(
+            id: msgRef.documentID,
+            rideId: rideId,
+            senderId: sender.id,
+            senderName: sender.name,
+            senderEmail: sender.email,
+            text: text,
+            timestamp: now,
+            isCurrentUser: true
+        )
+        #else
+        return CarpoolChatMessage(rideId: rideId, senderId: sender.id, senderName: sender.name, text: text, isCurrentUser: true)
+        #endif
+    }
+
+    func observeMessages(for rideId: String, onUpdate: @escaping ([CarpoolChatMessage]) -> Void) -> (() -> Void)? {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        let listener = db.collection("rides")
+            .document(rideId)
+            .collection("messages")
+            .order(by: "timestamp", descending: false)
+            .addSnapshotListener { snapshot, error in
+                guard let documents = snapshot?.documents, error == nil else { return }
+                let messages = documents.compactMap { doc -> CarpoolChatMessage? in
+                    let data = doc.data()
+                    let senderId = data["senderId"] as? String ?? ""
+                    let senderName = data["senderName"] as? String ?? "Colleague"
+                    let senderEmail = data["senderEmail"] as? String ?? ""
+                    let text = data["text"] as? String ?? ""
+                    let ts: Date
+                    if let firestoreTs = data["timestamp"] as? Timestamp {
+                        ts = firestoreTs.dateValue()
+                    } else if let seconds = data["timestamp"] as? Double {
+                        ts = Date(timeIntervalSince1970: seconds)
+                    } else {
+                        ts = Date()
+                    }
+                    return CarpoolChatMessage(
+                        id: doc.documentID,
+                        rideId: rideId,
+                        senderId: senderId,
+                        senderName: senderName,
+                        senderEmail: senderEmail,
+                        text: text,
+                        timestamp: ts
+                    )
+                }
+                onUpdate(messages)
+            }
+        return {
+            listener.remove()
+        }
+        #else
+        return nil
+        #endif
+    }
 }

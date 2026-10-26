@@ -2,6 +2,8 @@ import SwiftUI
 
 struct RideCardView: View {
     let ride: CommuteRide
+    var isHost: Bool = false
+    var onChat: (() -> Void)? = nil
     let onAction: () -> Void
 
     var body: some View {
@@ -24,9 +26,21 @@ struct RideCardView: View {
                         .shadow(color: AppTheme.accentBlue.opacity(0.3), radius: 6)
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(ride.driverName)
-                            .font(.system(size: 16, weight: .semibold, design: .rounded))
-                            .foregroundColor(AppTheme.textLight)
+                        HStack(spacing: 6) {
+                            Text(ride.driverName)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(AppTheme.textLight)
+
+                            if isHost {
+                                Text("HOST")
+                                    .font(.system(size: 9, weight: .black))
+                                    .foregroundColor(AppTheme.accentBlue)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(AppTheme.accentBlueSoft)
+                                    .clipShape(Capsule())
+                            }
+                        }
 
                         Text(ride.driverDepartment)
                             .font(.system(size: 12, weight: .medium))
@@ -135,7 +149,7 @@ struct RideCardView: View {
                 }
             }
 
-            // Optional Notes (matching Android's tvNotes)
+            // Optional Notes
             if !ride.notes.isEmpty {
                 HStack(spacing: 6) {
                     Image(systemName: "note.text")
@@ -152,7 +166,7 @@ struct RideCardView: View {
                 .cornerRadius(8)
             }
 
-            // Footer: Vehicle info & Action Button
+            // Footer: Vehicle info & Action Buttons
             HStack(alignment: .center) {
                 HStack(spacing: 6) {
                     Image(systemName: "car.side.fill")
@@ -166,38 +180,76 @@ struct RideCardView: View {
 
                 Spacer()
 
-                Button(action: onAction) {
-                    HStack(spacing: 5) {
-                        if ride.isUserBooked {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .bold))
-                            Text("Reserved")
-                        } else if ride.hasPendingRequest {
-                            Image(systemName: "hourglass")
-                                .font(.system(size: 11))
-                            Text("Requested")
-                        } else {
-                            Image(systemName: "paperplane.fill")
-                                .font(.system(size: 11))
-                            Text("Request Join")
+                HStack(spacing: 8) {
+                    // Chat Button
+                    if let onChat = onChat {
+                        Button(action: onChat) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
+                                    .font(.system(size: 11))
+                                Text("Chat")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                            }
+                            .foregroundColor(AppTheme.accentBlue)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(AppTheme.accentBlueSoft)
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(AppTheme.accentBlue.opacity(0.3), lineWidth: 1)
+                            )
                         }
                     }
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(
-                        ride.isUserBooked ?
-                            AppTheme.accentBlue :
-                            (ride.hasPendingRequest ? Color.orange.opacity(0.85) : AppTheme.buttonPurple)
-                    )
-                    .cornerRadius(16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(Color.white.opacity(ride.isUserBooked ? 0.3 : 0.15), lineWidth: 1)
-                    )
+
+                    // Host Badge or Request Action Button
+                    if isHost {
+                        HStack(spacing: 4) {
+                            Image(systemName: "steeringwheel")
+                                .font(.system(size: 11))
+                            Text("Your Ride")
+                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                        }
+                        .foregroundColor(AppTheme.accentBlue)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(Color.white.opacity(0.08))
+                        .cornerRadius(14)
+                    } else {
+                        Button(action: onAction) {
+                            HStack(spacing: 5) {
+                                if ride.isUserBooked {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text("Reserved")
+                                } else if ride.hasPendingRequest {
+                                    Image(systemName: "hourglass")
+                                        .font(.system(size: 11))
+                                    Text("Requested")
+                                } else {
+                                    Image(systemName: "paperplane.fill")
+                                        .font(.system(size: 11))
+                                    Text("Request Join")
+                                }
+                            }
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(
+                                ride.isUserBooked ?
+                                    AppTheme.accentBlue :
+                                    (ride.hasPendingRequest ? Color.orange.opacity(0.85) : AppTheme.buttonPurple)
+                            )
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.white.opacity(ride.isUserBooked ? 0.3 : 0.15), lineWidth: 1)
+                            )
+                        }
+                        .disabled(ride.availableSeats == 0 && !ride.isUserBooked && !ride.hasPendingRequest)
+                    }
                 }
-                .disabled(ride.availableSeats == 0 && !ride.isUserBooked && !ride.hasPendingRequest)
             }
         }
         .padding(18)
@@ -210,22 +262,4 @@ struct RideCardView: View {
                 )
         )
     }
-}
-
-#Preview {
-    RideCardView(
-        ride: CommuteRide(
-            driverName: "Sarah Chen",
-            driverDepartment: "Product Engineering",
-            vehicleDescription: "Tesla Model Y • Blue",
-            origin: "Downtown Hub",
-            destination: "Corporate HQ - Innovation Campus",
-            departureTime: "8:15 AM",
-            availableSeats: 2,
-            totalSeats: 4
-        ),
-        onAction: {}
-    )
-    .padding()
-    .background(Color.black)
 }
