@@ -99,11 +99,14 @@ struct ManageRequestsView: View {
                         Text(request.passengerName)
                             .font(.system(size: 16, weight: .semibold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
 
                         Text(request.passengerEmail)
                             .font(.system(size: 12))
                             .foregroundColor(AppTheme.placeholderText)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
                 }
 

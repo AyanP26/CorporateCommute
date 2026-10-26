@@ -221,7 +221,7 @@ struct SettingsView: View {
 
             LocationRowView(
                 icon: "building.2.crop.circle.fill",
-                label: "Job / Office Location (Apple Maps)",
+                label: "WORK / OFFICE LOCATION",
                 location: workLocation,
                 placeholder: "Set primary workplace location..."
             ) {
@@ -246,7 +246,7 @@ struct SettingsView: View {
 
             LocationRowView(
                 icon: "house.circle.fill",
-                label: "Home Address (Apple Maps)",
+                label: "HOME ADDRESS",
                 location: homeLocation,
                 placeholder: "Set your departure home address..."
             ) {

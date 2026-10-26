@@ -31,6 +31,7 @@ struct RideCardView: View {
                             Text(ride.driverName)
                                 .font(.system(size: 16, weight: .semibold, design: .rounded))
                                 .foregroundColor(AppTheme.textLight)
+                                .lineLimit(1)
 
                             if isHost {
                                 Text("HOST")
@@ -40,12 +41,14 @@ struct RideCardView: View {
                                     .padding(.vertical, 2)
                                     .background(AppTheme.accentBlueSoft)
                                     .clipShape(Capsule())
+                                    .lineLimit(1)
                             }
                         }
 
                         Text(ride.driverDepartment)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundColor(AppTheme.placeholderText)
+                            .lineLimit(1)
                     }
                 }
 
@@ -57,6 +60,7 @@ struct RideCardView: View {
                         .font(.system(size: 11))
                     Text(ride.availableSeats > 0 ? "\(ride.availableSeats) left" : "Full")
                         .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .lineLimit(1)
                 }
                 .foregroundColor(ride.availableSeats > 0 ? AppTheme.ecoGreen : AppTheme.placeholderText)
                 .padding(.horizontal, 10)
@@ -103,18 +107,20 @@ struct RideCardView: View {
                             Text("PICKUP")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(AppTheme.accentBlue)
+                                .lineLimit(1)
                             Text(ride.origin)
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(AppTheme.textLight)
                                 .lineLimit(1)
                         }
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
                         VStack(alignment: .trailing, spacing: 2) {
                             Text(ride.departureTime)
                                 .font(.system(size: 13, weight: .bold, design: .rounded))
                                 .foregroundColor(AppTheme.accentBlue)
+                                .lineLimit(1)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(AppTheme.accentBlueSoft)
@@ -124,6 +130,7 @@ struct RideCardView: View {
                                 Text(ride.departureDate)
                                     .font(.system(size: 10))
                                     .foregroundColor(AppTheme.placeholderText)
+                                    .lineLimit(1)
                             }
                         }
                     }
@@ -133,18 +140,20 @@ struct RideCardView: View {
                             Text("DROP-OFF")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundColor(AppTheme.ecoGreen)
+                                .lineLimit(1)
                             Text(ride.destination)
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundColor(AppTheme.textLight.opacity(0.95))
                                 .lineLimit(1)
                         }
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
                         if let retTime = ride.returnTime {
                             Text("Return: \(retTime)")
                                 .font(.system(size: 11, weight: .regular))
                                 .foregroundColor(AppTheme.placeholderText)
+                                .lineLimit(1)
                         }
                     }
                 }
@@ -159,7 +168,8 @@ struct RideCardView: View {
                     Text(ride.notes)
                         .font(.system(size: 12))
                         .foregroundColor(AppTheme.placeholderText.opacity(0.9))
-                        .lineLimit(2)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
@@ -177,19 +187,21 @@ struct RideCardView: View {
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(AppTheme.placeholderText)
                         .lineLimit(1)
+                        .truncationMode(.tail)
                 }
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 HStack(spacing: 8) {
-                    // Chat Button (Matching Android's Ride Chat)
+                    // Chat Button
                     if let onChat = onChat {
                         Button(action: onChat) {
                             HStack(spacing: 4) {
                                 Image(systemName: "bubble.left.and.bubble.right.fill")
                                     .font(.system(size: 11))
-                                Text("Ride Chat")
+                                Text("Chat")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
                             }
                             .foregroundColor(AppTheme.accentBlue)
                             .padding(.horizontal, 10)
@@ -201,6 +213,7 @@ struct RideCardView: View {
                                     .stroke(AppTheme.accentBlue.opacity(0.3), lineWidth: 1)
                             )
                         }
+                        .fixedSize()
                     }
 
                     // Host Actions
@@ -213,6 +226,7 @@ struct RideCardView: View {
                                             .font(.system(size: 11))
                                         Text("Delete")
                                             .font(.system(size: 12, weight: .bold, design: .rounded))
+                                            .lineLimit(1)
                                     }
                                     .foregroundColor(AppTheme.errorRed)
                                     .padding(.horizontal, 10)
@@ -224,18 +238,21 @@ struct RideCardView: View {
                                             .stroke(AppTheme.errorRed.opacity(0.35), lineWidth: 1)
                                     )
                                 }
+                                .fixedSize()
                             } else {
                                 HStack(spacing: 4) {
                                     Image(systemName: "lock.fill")
                                         .font(.system(size: 10))
-                                    Text("Locked (<24h)")
+                                    Text("Locked")
                                         .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                        .lineLimit(1)
                                 }
                                 .foregroundColor(AppTheme.placeholderText.opacity(0.7))
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 6)
                                 .background(Color.white.opacity(0.06))
                                 .clipShape(Capsule())
+                                .fixedSize()
                             }
                         }
                     } else {
@@ -246,14 +263,17 @@ struct RideCardView: View {
                                     Image(systemName: "checkmark")
                                         .font(.system(size: 11, weight: .bold))
                                     Text("Reserved")
+                                        .lineLimit(1)
                                 } else if ride.hasPendingRequest {
                                     Image(systemName: "hourglass")
                                         .font(.system(size: 11))
                                     Text("Requested")
+                                        .lineLimit(1)
                                 } else {
                                     Image(systemName: "paperplane.fill")
                                         .font(.system(size: 11))
                                     Text("Request Join")
+                                        .lineLimit(1)
                                 }
                             }
                             .font(.system(size: 13, weight: .bold, design: .rounded))
@@ -271,6 +291,7 @@ struct RideCardView: View {
                                     .stroke(Color.white.opacity(ride.isUserBooked ? 0.3 : 0.15), lineWidth: 1)
                             )
                         }
+                        .fixedSize()
                         .disabled(ride.availableSeats == 0 && !ride.isUserBooked && !ride.hasPendingRequest)
                     }
                 }

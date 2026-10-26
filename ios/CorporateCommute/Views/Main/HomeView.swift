@@ -252,6 +252,8 @@ struct HomeView: View {
             Text(title)
                 .font(.system(size: 14, weight: dashboardVM.selectedTab == index ? .bold : .medium, design: .rounded))
                 .foregroundColor(dashboardVM.selectedTab == index ? .white : AppTheme.placeholderText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 9)
                 .background(
@@ -275,7 +277,7 @@ struct HomeView: View {
                 HStack(spacing: 12) {
                     quickActionCard(
                         title: "Offer Ride",
-                        subtitle: "Share commute route",
+                        subtitle: "Share route",
                         icon: "steeringwheel",
                         color: AppTheme.accentBlue
                     ) {
@@ -284,7 +286,7 @@ struct HomeView: View {
 
                     quickActionCard(
                         title: "General Chat",
-                        subtitle: "All company commuters",
+                        subtitle: "All commuters",
                         icon: "bubble.left.and.bubble.right.fill",
                         color: AppTheme.accentPurple
                     ) {
@@ -294,8 +296,8 @@ struct HomeView: View {
 
                 HStack(spacing: 12) {
                     quickActionCard(
-                        title: "Incoming Requests",
-                        subtitle: "\(dashboardVM.incomingRequests.filter { $0.status == .pending }.count) pending approval",
+                        title: "Requests",
+                        subtitle: "\(dashboardVM.incomingRequests.filter { $0.status == .pending }.count) pending",
                         icon: "tray.and.arrow.down.fill",
                         color: Color.orange,
                         badgeCount: dashboardVM.incomingRequests.filter { $0.status == .pending }.count
@@ -304,8 +306,8 @@ struct HomeView: View {
                     }
 
                     quickActionCard(
-                        title: "My Sent Requests",
-                        subtitle: "\(dashboardVM.mySentRequests.count) carpool requests",
+                        title: "My Sent",
+                        subtitle: "\(dashboardVM.mySentRequests.count) requested",
                         icon: "paperplane.fill",
                         color: AppTheme.ecoGreen
                     ) {
@@ -522,19 +524,22 @@ struct HomeView: View {
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("JOB LOCATION (APPLE MAPS)")
+                Text("WORK LOCATION")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(AppTheme.accentBlue)
+                    .lineLimit(1)
 
                 Text(workLoc.name)
                     .font(.system(size: 14, weight: .bold, design: .rounded))
                     .foregroundColor(AppTheme.textLight)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.9)
 
                 Text(workLoc.address)
                     .font(.system(size: 11))
                     .foregroundColor(AppTheme.placeholderText)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.9)
             }
 
             Spacer()
@@ -638,11 +643,14 @@ struct HomeView: View {
                     Text(title)
                         .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(AppTheme.textLight)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.85)
 
                     Text(subtitle)
                         .font(.system(size: 11))
                         .foregroundColor(AppTheme.placeholderText)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.85)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -790,8 +798,8 @@ struct HomeView: View {
             // Sub-category Filter Selector
             HStack(spacing: 8) {
                 myCarpoolsFilterButton(title: "All (\(hostedRides.count + joinedRides.count))", index: 0)
-                myCarpoolsFilterButton(title: "Hosted by You (\(hostedRides.count))", index: 1)
-                myCarpoolsFilterButton(title: "Joined / Sent (\(joinedRides.count))", index: 2)
+                myCarpoolsFilterButton(title: "Hosted (\(hostedRides.count))", index: 1)
+                myCarpoolsFilterButton(title: "Joined (\(joinedRides.count))", index: 2)
             }
             .padding(4)
             .background(Color.black.opacity(0.35))
@@ -808,7 +816,7 @@ struct HomeView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "steeringwheel")
                                 .foregroundColor(AppTheme.accentBlue)
-                            Text("Carpools You're Driving")
+                            Text("Rides You're Driving")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundColor(AppTheme.textLight)
                         }
@@ -857,7 +865,7 @@ struct HomeView: View {
                         HStack(spacing: 6) {
                             Image(systemName: "person.crop.circle.badge.checkmark")
                                 .foregroundColor(AppTheme.ecoGreen)
-                            Text("Carpools You've Joined")
+                            Text("Rides You've Joined")
                                 .font(.system(size: 16, weight: .bold, design: .rounded))
                                 .foregroundColor(AppTheme.textLight)
                         }
@@ -910,6 +918,8 @@ struct HomeView: View {
             Text(title)
                 .font(.system(size: 12, weight: dashboardVM.myCarpoolsFilter == index ? .bold : .medium))
                 .foregroundColor(dashboardVM.myCarpoolsFilter == index ? .white : AppTheme.placeholderText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
                 .background(
@@ -974,9 +984,9 @@ struct HomeView: View {
                         // Departure Location (Apple Maps)
                         LocationRowView(
                             icon: "mappin.and.ellipse",
-                            label: "Departure Location (Apple Maps)",
+                            label: "DEPARTURE LOCATION",
                             location: selectedOriginLocation,
-                            placeholder: "Tap to select departure on Apple Maps"
+                            placeholder: "Select departure point"
                         ) {
                             showingOriginPicker = true
                         }
@@ -984,9 +994,9 @@ struct HomeView: View {
                         // Destination (Apple Maps)
                         LocationRowView(
                             icon: "building.2.fill",
-                            label: "Office Destination (Apple Maps)",
+                            label: "OFFICE DESTINATION",
                             location: selectedDestinationLocation,
-                            placeholder: "Tap to select office destination"
+                            placeholder: "Select destination office"
                         ) {
                             showingDestinationPicker = true
                         }

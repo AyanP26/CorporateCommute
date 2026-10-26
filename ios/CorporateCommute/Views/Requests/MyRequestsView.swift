@@ -81,9 +81,10 @@ struct MyRequestsView: View {
                             .font(.system(size: 13))
                             .foregroundColor(AppTheme.accentBlue)
                         Text(request.route)
-                            .font(.system(size: 16, weight: .bold, design: .rounded))
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
-                            .lineLimit(2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
                     }
                 }
 
@@ -104,6 +105,8 @@ struct MyRequestsView: View {
                 Text(statusDescription(request.status))
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(AppTheme.textLight.opacity(0.9))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
             }
 
             // Timestamp footer
@@ -153,11 +156,11 @@ struct MyRequestsView: View {
     private func statusDescription(_ status: RideRequestStatus) -> String {
         switch status {
         case .pending:
-            return "Status: Waiting for driver approval"
+            return "Waiting for driver approval"
         case .accepted:
-            return "Status: Approved! You're booked for this commute"
+            return "Approved! Seat confirmed"
         case .declined:
-            return "Status: Declined by driver"
+            return "Declined by driver"
         }
     }
 

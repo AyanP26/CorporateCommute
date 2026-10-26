@@ -146,10 +146,13 @@ struct CarpoolChatView: View {
                 Text(isGeneralChat ? "General Commuter Channel" : "Carpool Coordination Chat")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(AppTheme.textLight)
+                    .lineLimit(1)
 
-                Text(isGeneralChat ? "Live chat synced in real time across iOS and Android coworkers." : "Confirmed riders and driver can coordinate route pickup here.")
+                Text(isGeneralChat ? "Live chat synced across iOS and Android coworkers." : "Coordinate pickup and schedule with confirmed riders.")
                     .font(.system(size: 11))
                     .foregroundColor(AppTheme.placeholderText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.9)
             }
 
             Spacer()

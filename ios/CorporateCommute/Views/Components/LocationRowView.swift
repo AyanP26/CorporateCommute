@@ -38,6 +38,7 @@ struct LocationRowView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(AppTheme.accentBlue)
                         .textCase(.uppercase)
+                        .lineLimit(1)
 
                     if let loc = location {
                         Text(loc.name)
@@ -53,6 +54,7 @@ struct LocationRowView: View {
                         Text(placeholder)
                             .font(.system(size: 14))
                             .foregroundColor(AppTheme.placeholderText)
+                            .lineLimit(1)
                     }
                 }
 
