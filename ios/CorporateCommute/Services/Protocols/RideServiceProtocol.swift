@@ -8,4 +8,10 @@ protocol RideServiceProtocol: AnyObject {
     func bookRide(rideId: String, userId: String) async throws
     func cancelBooking(rideId: String, userId: String) async throws
     func offerRide(_ ride: CommuteRide) async throws -> CommuteRide
+
+    // Ride Requests (Parity with Android)
+    func sendRideRequest(ride: CommuteRide, passenger: User) async throws -> RideRequest
+    func fetchIncomingRequests(for driverId: String) async throws -> [RideRequest]
+    func fetchMySentRequests(for passengerId: String) async throws -> [RideRequest]
+    func updateRequestStatus(requestId: String, status: RideRequestStatus) async throws
 }

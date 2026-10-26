@@ -44,6 +44,32 @@ final class MockRideService: RideServiceProtocol {
         )
     ]
 
+    // Sample Ride Requests for parity testing
+    private var requests: [RideRequest] = [
+        RideRequest(
+            requestId: "sample_req_1",
+            rideId: "mock_driver_1",
+            driverId: "mock_driver_1",
+            passengerId: "mock_passenger_1",
+            passengerName: "Alex Rivera",
+            passengerEmail: "alex.rivera@corporate.com",
+            route: "Downtown Park & Ride ➔ Corporate HQ",
+            status: .pending,
+            timestamp: Date().addingTimeInterval(-1800)
+        ),
+        RideRequest(
+            requestId: "sample_req_2",
+            rideId: "mock_driver_2",
+            driverId: "mock_driver_2",
+            passengerId: "mock_passenger_2",
+            passengerName: "Elena Rostova",
+            passengerEmail: "elena.r@corporate.com",
+            route: "Westside Transit Hub ➔ Building B",
+            status: .accepted,
+            timestamp: Date().addingTimeInterval(-3600)
+        )
+    ]
+
     var availableRidesPublisher: AnyPublisher<[CommuteRide], Never> {
         $rides.eraseToAnyPublisher()
     }
@@ -84,5 +110,54 @@ final class MockRideService: RideServiceProtocol {
             rides.insert(ride, at: 0)
         }
         return ride
+    }
+
+    // MARK: - Ride Requests Protocol
+    func sendRideRequest(ride: CommuteRide, passenger: User) async throws -> RideRequest {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        let newRequest = RideRequest(
+            requestId: UUID().uuidString,
+            rideId: ride.id,
+            driverId: ride.driverId,
+            passengerId: passenger.id,
+            passengerName: passenger.name.isEmpty ? "Commuter" : passenger.name,
+            passengerEmail: passenger.email,
+            route: "\(ride.origin) ➔ \(ride.destination)",
+            status: .pending,
+            timestamp: Date()
+        )
+        requests.insert(newRequest, at: 0)
+        return newRequest
+    }
+
+    func fetchIncomingRequests(for driverId: String) async throws -> [RideRequest] {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        if driverId.isEmpty || driverId == "mock_driver_1" || driverId == "driver1" {
+            return requests.filter { $0.driverId == "mock_driver_1" || $0.driverId == driverId || $0.driverId.isEmpty }
+        }
+        return requests.filter { $0.driverId == driverId }
+    }
+
+    func fetchMySentRequests(for passengerId: String) async throws -> [RideRequest] {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        if passengerId.isEmpty {
+            return requests
+        }
+        let matching = requests.filter { $0.passengerId == passengerId }
+        return matching.isEmpty ? requests : matching
+    }
+
+    func updateRequestStatus(requestId: String, status: RideRequestStatus) async throws {
+        try await Task.sleep(nanoseconds: 200_000_000)
+        if let index = requests.firstIndex(where: { $0.requestId == requestId }) {
+            requests[index].status = status
+            // If accepted, decrement available seats for corresponding ride
+            if status == .accepted {
+                let rideId = requests[index].rideId
+                if let rideIndex = rides.firstIndex(where: { $0.id == rideId }), rides[rideIndex].availableSeats > 0 {
+                    rides[rideIndex].availableSeats -= 1
+                }
+            }
+        }
     }
 }

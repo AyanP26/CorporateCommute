@@ -59,6 +59,38 @@ struct HomeView: View {
             .sheet(isPresented: $dashboardVM.showingOfferRideSheet) {
                 offerRideSheet
             }
+            .sheet(isPresented: $dashboardVM.showingIncomingRequestsSheet) {
+                ManageRequestsView(dashboardVM: dashboardVM)
+            }
+            .sheet(isPresented: $dashboardVM.showingMyRequestsSheet) {
+                MyRequestsView(dashboardVM: dashboardVM)
+            }
+            .overlay(alignment: .top) {
+                if dashboardVM.showRequestBanner, let msg = dashboardVM.requestAlertMessage {
+                    HStack(spacing: 8) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(AppTheme.ecoGreen)
+                        Text(msg)
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(Color(red: 0x06 / 255.0, green: 0x09 / 255.0, blue: 0x1A / 255.0))
+                            .overlay(Capsule().stroke(AppTheme.ecoGreen.opacity(0.4), lineWidth: 1))
+                    )
+                    .padding(.top, 16)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .shadow(color: .black.opacity(0.4), radius: 10, y: 5)
+                }
+            }
+            .onAppear {
+                if let userId = authViewModel.currentUser?.id {
+                    dashboardVM.loadRequests(for: userId)
+                }
+            }
             .confirmationDialog("Log Out", isPresented: $showingLogoutConfirmation, titleVisibility: .visible) {
                 Button("Log Out", role: .destructive) {
                     authViewModel.logout()
@@ -203,24 +235,47 @@ struct HomeView: View {
             // Job Location & Route Banner (Apple Maps Integrated)
             jobLocationSummaryCard
 
-            // Quick Action Row
-            HStack(spacing: 12) {
-                quickActionCard(
-                    title: "Offer Ride",
-                    subtitle: "Share commute route",
-                    icon: "steeringwheel",
-                    color: AppTheme.accentBlue
-                ) {
-                    dashboardVM.showingOfferRideSheet = true
+            // Quick Action Grid (Parity with Android: Post Ride, View Requests, View My Requests, Settings)
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    quickActionCard(
+                        title: "Offer Ride",
+                        subtitle: "Share commute route",
+                        icon: "steeringwheel",
+                        color: AppTheme.accentBlue
+                    ) {
+                        dashboardVM.showingOfferRideSheet = true
+                    }
+
+                    quickActionCard(
+                        title: "Incoming Requests",
+                        subtitle: "\(dashboardVM.incomingRequests.filter { $0.status == .pending }.count) pending approval",
+                        icon: "tray.and.arrow.down.fill",
+                        color: Color.orange,
+                        badgeCount: dashboardVM.incomingRequests.filter { $0.status == .pending }.count
+                    ) {
+                        dashboardVM.showingIncomingRequestsSheet = true
+                    }
                 }
 
-                quickActionCard(
-                    title: "User Settings",
-                    subtitle: "Job & car details",
-                    icon: "slider.horizontal.3",
-                    color: AppTheme.ecoGreen
-                ) {
-                    showingSettings = true
+                HStack(spacing: 12) {
+                    quickActionCard(
+                        title: "My Sent Requests",
+                        subtitle: "\(dashboardVM.mySentRequests.count) carpool requests",
+                        icon: "paperplane.fill",
+                        color: AppTheme.ecoGreen
+                    ) {
+                        dashboardVM.showingMyRequestsSheet = true
+                    }
+
+                    quickActionCard(
+                        title: "User Settings",
+                        subtitle: "Job & car details",
+                        icon: "slider.horizontal.3",
+                        color: AppTheme.accentBlue.opacity(0.85)
+                    ) {
+                        showingSettings = true
+                    }
                 }
             }
 
@@ -447,30 +502,45 @@ struct HomeView: View {
         )
     }
 
-    private func quickActionCard(title: String, subtitle: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+    private func quickActionCard(title: String, subtitle: String, icon: String, color: Color, badgeCount: Int = 0, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 10) {
-                Circle()
-                    .fill(color.opacity(0.2))
-                    .frame(width: 40, height: 40)
-                    .overlay(
-                        Image(systemName: icon)
-                            .font(.system(size: 18))
-                            .foregroundColor(color)
-                    )
+                HStack {
+                    Circle()
+                        .fill(color.opacity(0.2))
+                        .frame(width: 40, height: 40)
+                        .overlay(
+                            Image(systemName: icon)
+                                .font(.system(size: 18))
+                                .foregroundColor(color)
+                        )
+
+                    Spacer()
+
+                    if badgeCount > 0 {
+                        Text("\(badgeCount)")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.orange)
+                            .clipShape(Capsule())
+                    }
+                }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
                         .foregroundColor(AppTheme.textLight)
 
                     Text(subtitle)
-                        .font(.system(size: 12))
+                        .font(.system(size: 11))
                         .foregroundColor(AppTheme.placeholderText)
+                        .lineLimit(1)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
+            .padding(14)
             .background(
                 RoundedRectangle(cornerRadius: 20)
                     .fill(AppTheme.cardBackground)
@@ -566,6 +636,15 @@ struct HomeView: View {
                     RideCardView(ride: ride) {
                         if ride.isUserBooked {
                             dashboardVM.cancelBooking(ride)
+                        } else if ride.hasPendingRequest {
+                            dashboardVM.requestAlertMessage = "Your request is already pending driver approval."
+                            withAnimation { dashboardVM.showRequestBanner = true }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                                withAnimation { dashboardVM.showRequestBanner = false }
+                            }
+                        } else if let user = authViewModel.currentUser {
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            dashboardVM.sendRideRequest(ride: ride, user: user)
                         } else {
                             dashboardVM.bookRide(ride)
                         }

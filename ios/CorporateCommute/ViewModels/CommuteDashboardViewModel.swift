@@ -5,7 +5,16 @@ final class CommuteDashboardViewModel: ObservableObject {
     @Published var selectedTab: Int = 0 // 0: Overview/My Rides, 1: Find Carpool, 2: Eco Impact
     @Published var searchQuery: String = ""
     @Published var showingOfferRideSheet: Bool = false
+    @Published var showingIncomingRequestsSheet: Bool = false
+    @Published var showingMyRequestsSheet: Bool = false
     @Published var selectedRideForDetails: CommuteRide? = nil
+
+    // Requests Management (Parity with Android)
+    @Published var incomingRequests: [RideRequest] = []
+    @Published var mySentRequests: [RideRequest] = []
+    @Published var requestedRideIds: Set<String> = []
+    @Published var requestAlertMessage: String? = nil
+    @Published var showRequestBanner: Bool = false
 
     // Offer ride form fields
     @Published var newRideOrigin: String = "West Suburbs Hub"
@@ -45,6 +54,82 @@ final class CommuteDashboardViewModel: ObservableObject {
             .store(in: &cancellables)
 
         loadInitialRides()
+    }
+
+    func loadRequests(for userId: String) {
+        Task { @MainActor in
+            do {
+                async let incoming = rideService.fetchIncomingRequests(for: userId)
+                async let mySent = rideService.fetchMySentRequests(for: userId)
+                let (inc, sent) = try await (incoming, mySent)
+                self.incomingRequests = inc
+                self.mySentRequests = sent
+                self.requestedRideIds = Set(sent.map { $0.rideId })
+
+                // Update hasPendingRequest on availableRides
+                for index in 0..<self.availableRides.count {
+                    let rId = self.availableRides[index].id
+                    self.availableRides[index].hasPendingRequest = self.requestedRideIds.contains(rId)
+                }
+            } catch {
+                print("[CommuteDashboardViewModel] Load requests error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func sendRideRequest(ride: CommuteRide, user: User) {
+        Task { @MainActor in
+            do {
+                let newReq = try await rideService.sendRideRequest(ride: ride, passenger: user)
+                self.mySentRequests.insert(newReq, at: 0)
+                self.requestedRideIds.insert(ride.id)
+
+                if let idx = self.availableRides.firstIndex(where: { $0.id == ride.id }) {
+                    self.availableRides[idx].hasPendingRequest = true
+                }
+
+                self.requestAlertMessage = "Ride request sent to \(ride.driverName)! 🚗"
+                self.showRequestBanner = true
+
+                // Auto hide banner after 3 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    self.showRequestBanner = false
+                }
+            } catch {
+                self.requestAlertMessage = "Failed to send request: \(error.localizedDescription)"
+                self.showRequestBanner = true
+            }
+        }
+    }
+
+    func acceptRequest(_ request: RideRequest) {
+        Task { @MainActor in
+            do {
+                try await rideService.updateRequestStatus(requestId: request.requestId, status: .accepted)
+                if let idx = self.incomingRequests.firstIndex(where: { $0.requestId == request.requestId }) {
+                    self.incomingRequests[idx].status = .accepted
+                }
+                // Also decrement available seats locally if corresponding ride exists
+                if let rideIdx = self.availableRides.firstIndex(where: { $0.id == request.rideId }), self.availableRides[rideIdx].availableSeats > 0 {
+                    self.availableRides[rideIdx].availableSeats -= 1
+                }
+            } catch {
+                print("[CommuteDashboardViewModel] Accept error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func declineRequest(_ request: RideRequest) {
+        Task { @MainActor in
+            do {
+                try await rideService.updateRequestStatus(requestId: request.requestId, status: .declined)
+                if let idx = self.incomingRequests.firstIndex(where: { $0.requestId == request.requestId }) {
+                    self.incomingRequests[idx].status = .declined
+                }
+            } catch {
+                print("[CommuteDashboardViewModel] Decline error: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func loadInitialRides() {

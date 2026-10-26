@@ -38,6 +38,9 @@
 		A1B1C103 /* LocationPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C103 /* LocationPickerView.swift */; };
 		A1B1C104 /* LocationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C104 /* LocationRowView.swift */; };
 		A1B1C105 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F1C105 /* SettingsView.swift */; };
+		A2B1C101 /* RideRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C101 /* RideRequest.swift */; };
+		A2B1C102 /* ManageRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C102 /* ManageRequestsView.swift */; };
+		A2B1C103 /* MyRequestsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2F1C103 /* MyRequestsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +76,9 @@
 		A1F1C103 /* LocationPickerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationPickerView.swift; sourceTree = "<group>"; };
 		A1F1C104 /* LocationRowView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LocationRowView.swift; sourceTree = "<group>"; };
 		A1F1C105 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A2F1C101 /* RideRequest.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideRequest.swift; sourceTree = "<group>"; };
+		A2F1C102 /* ManageRequestsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManageRequestsView.swift; sourceTree = "<group>"; };
+		A2F1C103 /* MyRequestsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MyRequestsView.swift; sourceTree = "<group>"; };
 		FD00863D079807B208F10234 /* RideServiceProtocol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RideServiceProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -135,8 +141,18 @@
 				3B81A24EA4F41D32EBEFAEEF /* Components */,
 				3E0047BCAE49B474E77CE0E5 /* Main */,
 				A1F1C100 /* Settings */,
+				A2F1C100 /* Requests */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		A2F1C100 /* Requests */ = {
+			isa = PBXGroup;
+			children = (
+				A2F1C102 /* ManageRequestsView.swift */,
+				A2F1C103 /* MyRequestsView.swift */,
+			);
+			path = Requests;
 			sourceTree = "<group>";
 		};
 		A1F1C100 /* Settings */ = {
@@ -243,6 +259,7 @@
 				09CB9C4CE473834B35CFEDCF /* User.swift */,
 				F6F9E125BA0B531E1D2239C2 /* CommuteRide.swift */,
 				A1F1C101 /* CommuteLocation.swift */,
+				A2F1C101 /* RideRequest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -370,6 +387,9 @@
 				A1B1C103 /* LocationPickerView.swift in Sources */,
 				A1B1C104 /* LocationRowView.swift in Sources */,
 				A1B1C105 /* SettingsView.swift in Sources */,
+				A2B1C101 /* RideRequest.swift in Sources */,
+				A2B1C102 /* ManageRequestsView.swift in Sources */,
+				A2B1C103 /* MyRequestsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -96,13 +96,21 @@ struct RideCardView: View {
 
                         Spacer()
 
-                        Text(ride.departureTime)
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(AppTheme.accentBlue)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(AppTheme.accentBlueSoft)
-                            .cornerRadius(8)
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(ride.departureTime)
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(AppTheme.accentBlue)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(AppTheme.accentBlueSoft)
+                                .cornerRadius(8)
+
+                            if !ride.departureDate.isEmpty {
+                                Text(ride.departureDate)
+                                    .font(.system(size: 10))
+                                    .foregroundColor(AppTheme.placeholderText)
+                            }
+                        }
                     }
 
                     HStack {
@@ -127,6 +135,23 @@ struct RideCardView: View {
                 }
             }
 
+            // Optional Notes (matching Android's tvNotes)
+            if !ride.notes.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "note.text")
+                        .font(.system(size: 11))
+                        .foregroundColor(AppTheme.placeholderText)
+                    Text(ride.notes)
+                        .font(.system(size: 12))
+                        .foregroundColor(AppTheme.placeholderText.opacity(0.9))
+                        .lineLimit(2)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.black.opacity(0.2))
+                .cornerRadius(8)
+            }
+
             // Footer: Vehicle info & Action Button
             HStack(alignment: .center) {
                 HStack(spacing: 6) {
@@ -142,21 +167,29 @@ struct RideCardView: View {
                 Spacer()
 
                 Button(action: onAction) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 5) {
                         if ride.isUserBooked {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 11, weight: .bold))
+                            Text("Reserved")
+                        } else if ride.hasPendingRequest {
+                            Image(systemName: "hourglass")
+                                .font(.system(size: 11))
+                            Text("Requested")
+                        } else {
+                            Image(systemName: "paperplane.fill")
+                                .font(.system(size: 11))
+                            Text("Request Join")
                         }
-                        Text(ride.isUserBooked ? "Reserved" : "Join Ride")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
                     }
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(.white)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(
                         ride.isUserBooked ?
                             AppTheme.accentBlue :
-                            AppTheme.buttonPurple
+                            (ride.hasPendingRequest ? Color.orange.opacity(0.85) : AppTheme.buttonPurple)
                     )
                     .cornerRadius(16)
                     .overlay(
@@ -164,7 +197,7 @@ struct RideCardView: View {
                             .stroke(Color.white.opacity(ride.isUserBooked ? 0.3 : 0.15), lineWidth: 1)
                     )
                 }
-                .disabled(ride.availableSeats == 0 && !ride.isUserBooked)
+                .disabled(ride.availableSeats == 0 && !ride.isUserBooked && !ride.hasPendingRequest)
             }
         }
         .padding(18)
