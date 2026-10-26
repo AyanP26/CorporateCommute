@@ -44,4 +44,11 @@
     <string name="request_sent">Request Sent</string>
     <string name="your_ride">Your Listed Ride</string>
     <string name="request_success_toast">Ride request sent to driver!</string>
+
+    <!-- Manage Requests Strings -->
+    <string name="manage_requests_title">Ride Requests &amp; Invites</string>
+    <string name="no_requests_found">No pending ride requests from passengers yet.</string>
+    <string name="accept_button">Accept</string>
+    <string name="decline_button">Decline</string>
+    <string name="view_requests_button">View Ride Requests</string>
 </resources>

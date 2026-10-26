@@ -29,6 +29,9 @@
         <activity
             android:name=".CreateRideActivity"
             android:exported="false" />
+        <activity
+            android:name=".ManageRequestsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
