@@ -2,7 +2,6 @@ package com.example.corporatecommute;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.corporatecommute.models.RideRequest;
 import com.example.corporatecommute.models.User;
 import com.example.corporatecommute.viewmodels.AuthViewModel;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -19,7 +19,6 @@ import java.util.List;
 
 public class MyRequestsActivity extends AppCompatActivity {
 
-    private ImageView btnBack;
     private RecyclerView rvMyRequests;
     private TextView tvNoMyRequests;
     private MyRequestsAdapter adapter;
@@ -34,7 +33,7 @@ public class MyRequestsActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         authViewModel = AuthViewModel.getInstance();
 
-        btnBack = findViewById(R.id.btnBack);
+        MaterialButton btnBack = findViewById(R.id.btnBack);
         rvMyRequests = findViewById(R.id.rvMyRequests);
         tvNoMyRequests = findViewById(R.id.tvNoMyRequests);
 

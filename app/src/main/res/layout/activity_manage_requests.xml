@@ -9,15 +9,17 @@
     android:paddingHorizontal="24dp"
     tools:context=".ManageRequestsActivity">
 
-    <ImageView
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnBack"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
         android:layout_marginTop="24dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/app_name"
-        android:padding="6dp"
-        android:src="@drawable/ic_launcher_foreground"
+        android:text="@string/back_button"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:backgroundTint="@color/button_purple"
+        app:cornerRadius="26dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,8 +27,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="48dp"
+        android:layout_marginTop="24dp"
         android:gravity="center"
         android:text="@string/manage_requests_title"
         android:textColor="@color/white"
