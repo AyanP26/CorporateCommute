@@ -25,6 +25,7 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         authViewModel = AuthViewModel.getInstance();
 
+        MaterialButton btnBack = findViewById(R.id.btnBack);
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
@@ -32,6 +33,7 @@ public class CreateAccountActivity extends AppCompatActivity {
         tvError = findViewById(R.id.tvError);
         btnSubmit = findViewById(R.id.btnSubmit);
 
+        btnBack.setOnClickListener(v -> finish());
         btnSubmit.setOnClickListener(v -> performRegistration());
     }
 
