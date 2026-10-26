@@ -30,13 +30,14 @@ final class FirestoreRideService: RideServiceProtocol {
         #if canImport(FirebaseFirestore)
         let db = Firestore.firestore()
         listenerRegistration = db.collection("rides")
-            .whereField("status", isEqualTo: RideStatus.scheduled.rawValue)
             .addSnapshotListener { [weak self] snapshot, error in
                 guard let self = self, let documents = snapshot?.documents else { return }
                 let loadedRides = documents.compactMap { doc -> CommuteRide? in
                     var data = doc.data()
                     data["id"] = doc.documentID
                     return CommuteRide(dictionary: data)
+                }.filter { ride in
+                    ride.status != .cancelled && ride.status != .completed
                 }
                 Task { @MainActor in
                     self.rides = loadedRides
@@ -53,6 +54,8 @@ final class FirestoreRideService: RideServiceProtocol {
             var data = doc.data()
             data["id"] = doc.documentID
             return CommuteRide(dictionary: data)
+        }.filter { ride in
+            ride.status != .cancelled && ride.status != .completed
         }
         await MainActor.run {
             self.rides = loadedRides

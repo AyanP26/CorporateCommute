@@ -341,7 +341,7 @@ struct HomeView: View {
                     emptyBookingsCard
                 } else {
                     ForEach(dashboardVM.bookedRides) { ride in
-                        let isHost = ride.driverId == currentUserId || ride.driverId == "current_user"
+                        let isHost = dashboardVM.isUserHost(of: ride, user: authViewModel.currentUser)
                         let pendingForRide = isHost ? dashboardVM.pendingRequests(for: ride.id) : []
                         RideCardView(
                             ride: ride,
@@ -760,18 +760,27 @@ struct HomeView: View {
                 .padding(.vertical, 40)
             } else {
                 ForEach(displayedRides) { ride in
-                    let isHost = ride.driverId == currentUserId
+                    let isHost = dashboardVM.isUserHost(of: ride, user: authViewModel.currentUser)
+                    let pendingForRide = isHost ? dashboardVM.pendingRequests(for: ride.id) : []
                     RideCardView(
                         ride: ride,
                         isHost: isHost,
+                        pendingRequests: pendingForRide,
                         onChat: {
                             dashboardVM.selectedChatRide = ride
                         },
                         onDelete: isHost ? {
                             rideToDelete = ride
                             showingDeleteConfirmation = true
+                        } : nil,
+                        onAcceptRequest: isHost ? { req in
+                            dashboardVM.acceptRequest(req)
+                        } : nil,
+                        onDeclineRequest: isHost ? { req in
+                            dashboardVM.declineRequest(req)
                         } : nil
                     ) {
+                        guard !isHost else { return }
                         if ride.isUserBooked {
                             dashboardVM.cancelBooking(ride, userId: currentUserId)
                         } else if ride.hasPendingRequest {
@@ -804,8 +813,8 @@ struct HomeView: View {
 
     // MARK: - Tab 2: My Carpools (Organized Hub)
     private var myCarpoolsTabContent: some View {
-        let hostedRides = dashboardVM.ridesHostedBy(userId: currentUserId)
-        let joinedRides = dashboardVM.ridesJoinedBy(userId: currentUserId)
+        let hostedRides = dashboardVM.ridesHostedBy(user: authViewModel.currentUser)
+        let joinedRides = dashboardVM.ridesJoinedBy(user: authViewModel.currentUser)
 
         return VStack(alignment: .leading, spacing: 18) {
             // Sub-category Filter Selector

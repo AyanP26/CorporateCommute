@@ -151,6 +151,16 @@ final class CommuteDashboardViewModel: ObservableObject {
     }
 
     func sendRideRequest(ride: CommuteRide, user: User) {
+        // Prevent requesting one's own carpool
+        guard !isUserHost(of: ride, user: user) else {
+            self.requestAlertMessage = "You are the driver of this carpool."
+            withAnimation { self.showRequestBanner = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                withAnimation { self.showRequestBanner = false }
+            }
+            return
+        }
+
         Task { @MainActor in
             do {
                 let newReq = try await rideService.sendRideRequest(ride: ride, passenger: user)
@@ -254,15 +264,40 @@ final class CommuteDashboardViewModel: ObservableObject {
         return result
     }
 
-    // MARK: - "My Carpools" Organization
+    // MARK: - "My Carpools" Organization & Host Detection
+    func isUserHost(of ride: CommuteRide, user: User?) -> Bool {
+        guard let user = user else {
+            return ride.driverId == "current_user"
+        }
+        let uid = user.id.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user" || ride.driverId == "driver1") {
+            return true
+        }
+        let userName = user.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let driverName = ride.driverName.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !userName.isEmpty && (driverName == userName || driverName == "you (driver)" || driverName.contains(userName)) {
+            return true
+        }
+        let userEmail = user.email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let driverEmail = ride.driverEmail.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if !userEmail.isEmpty && !driverEmail.isEmpty && userEmail == driverEmail {
+            return true
+        }
+        return false
+    }
+
     func ridesHostedBy(userId: String) -> [CommuteRide] {
         let uid = userId.trimmingCharacters(in: .whitespacesAndNewlines)
         return availableRides.filter { ride in
-            if !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user") {
+            if !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user" || ride.driverId == "driver1") {
                 return true
             }
             return false
         }
+    }
+
+    func ridesHostedBy(user: User?) -> [CommuteRide] {
+        availableRides.filter { isUserHost(of: $0, user: user) }
     }
 
     func ridesJoinedBy(userId: String) -> [CommuteRide] {
@@ -271,6 +306,15 @@ final class CommuteDashboardViewModel: ObservableObject {
             let isDriver = !uid.isEmpty && (ride.driverId == uid || ride.driverId == "current_user")
             guard !isDriver else { return false }
             return ride.isUserBooked || requestedRideIds.contains(ride.id)
+        }
+    }
+
+    func ridesJoinedBy(user: User?) -> [CommuteRide] {
+        availableRides.filter { ride in
+            guard !isUserHost(of: ride, user: user) else { return false }
+            let uid = user?.id ?? ""
+            let isPassenger = !uid.isEmpty && ride.passengerIds.contains(uid)
+            return ride.isUserBooked || isPassenger || requestedRideIds.contains(ride.id)
         }
     }
 
