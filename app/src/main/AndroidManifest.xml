@@ -35,6 +35,9 @@
         <activity
             android:name=".MyRequestsActivity"
             android:exported="false" />
+        <activity
+            android:name=".MessagingActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

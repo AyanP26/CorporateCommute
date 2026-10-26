@@ -25,7 +25,7 @@ import java.util.Set;
 public class HomeActivity extends AppCompatActivity {
 
     private TextView tvWelcomeUser, tvUserEmail, tvNoRides;
-    private MaterialButton btnPostRide, btnViewRequests, btnViewMyRequests, btnLogout;
+    private MaterialButton btnPostRide, btnViewRequests, btnViewMyRequests, btnChat, btnLogout;
     private RecyclerView rvRides;
     private RideAdapter rideAdapter;
     private AuthViewModel authViewModel;
@@ -45,6 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         btnPostRide = findViewById(R.id.btnPostRide);
         btnViewRequests = findViewById(R.id.btnViewRequests);
         btnViewMyRequests = findViewById(R.id.btnViewMyRequests);
+        btnChat = findViewById(R.id.btnChat);
         btnLogout = findViewById(R.id.btnLogout);
         rvRides = findViewById(R.id.rvRides);
 
@@ -78,6 +79,11 @@ public class HomeActivity extends AppCompatActivity {
 
         btnViewMyRequests.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, MyRequestsActivity.class);
+            startActivity(intent);
+        });
+
+        btnChat.setOnClickListener(v -> {
+            Intent intent = new Intent(HomeActivity.this, MessagingActivity.class);
             startActivity(intent);
         });
 

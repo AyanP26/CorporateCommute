@@ -57,4 +57,10 @@
     <string name="no_my_requests">You haven\'t requested to join any rides yet.</string>
     <string name="view_my_requests_button">My Sent Requests</string>
     <string name="back_button">Back</string>
+
+    <!-- Messaging Strings -->
+    <string name="messaging_title">Commuter Chat</string>
+    <string name="hint_message">Type a message...</string>
+    <string name="send_button">Send</string>
+    <string name="chat_button">Open Commuter Chat</string>
 </resources>
