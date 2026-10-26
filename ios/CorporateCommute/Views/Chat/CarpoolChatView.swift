@@ -11,6 +11,10 @@ struct CarpoolChatView: View {
     @State private var isSending: Bool = false
     @State private var listenerCancellation: (() -> Void)? = nil
 
+    private var isGeneralChat: Bool {
+        ride.id == "general_commuter_chat"
+    }
+
     private let rideService: RideServiceProtocol = FirebaseManager.shared.rideService
 
     var body: some View {
@@ -26,14 +30,14 @@ struct CarpoolChatView: View {
                     ScrollViewReader { proxy in
                         ScrollView {
                             LazyVStack(spacing: 12) {
-                                // Ride Summary Card
-                                rideSummaryBanner
+                                // Channel Summary Banner
+                                channelSummaryBanner
                                     .padding(.horizontal, 16)
                                     .padding(.top, 12)
 
                                 if messages.isEmpty {
                                     emptyChatPlaceholder
-                                        .padding(.top, 32)
+                                        .padding(.top, 28)
                                 } else {
                                     ForEach(messages) { message in
                                         let isMe = message.senderId == currentUser.id || message.isCurrentUser
@@ -84,7 +88,7 @@ struct CarpoolChatView: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(ride.origin) ➔ \(ride.destination)")
+                Text(isGeneralChat ? "General Commuter Chat" : "\(ride.origin) ➔ \(ride.destination)")
                     .font(.system(size: 15, weight: .bold, design: .rounded))
                     .foregroundColor(AppTheme.textLight)
                     .lineLimit(1)
@@ -94,7 +98,7 @@ struct CarpoolChatView: View {
                         .fill(AppTheme.ecoGreen)
                         .frame(width: 7, height: 7)
 
-                    Text("Driver: \(ride.driverName) • \(ride.departureTime)")
+                    Text(isGeneralChat ? "Company-Wide Network • Live" : "Driver: \(ride.driverName) • \(ride.departureTime)")
                         .font(.system(size: 12))
                         .foregroundColor(AppTheme.placeholderText)
                         .lineLimit(1)
@@ -103,11 +107,11 @@ struct CarpoolChatView: View {
 
             Spacer()
 
-            // Carpool badge
+            // Room badge
             HStack(spacing: 4) {
-                Image(systemName: "car.2.fill")
+                Image(systemName: isGeneralChat ? "globe" : "car.2.fill")
                     .font(.system(size: 11))
-                Text("Carpool")
+                Text(isGeneralChat ? "General" : "Ride Chat")
                     .font(.system(size: 11, weight: .semibold))
             }
             .foregroundColor(AppTheme.accentBlue)
@@ -131,19 +135,19 @@ struct CarpoolChatView: View {
         )
     }
 
-    // MARK: - Ride Summary Banner
-    private var rideSummaryBanner: some View {
+    // MARK: - Summary Banner
+    private var channelSummaryBanner: some View {
         HStack(spacing: 12) {
             Image(systemName: "bubble.left.and.bubble.right.fill")
                 .font(.system(size: 18))
                 .foregroundColor(AppTheme.accentPurple)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Carpool Coordination Chat")
+                Text(isGeneralChat ? "General Commuter Channel" : "Carpool Coordination Chat")
                     .font(.system(size: 13, weight: .bold, design: .rounded))
                     .foregroundColor(AppTheme.textLight)
 
-                Text("All confirmed riders and the driver can see and reply here.")
+                Text(isGeneralChat ? "Live chat synced in real time across iOS and Android coworkers." : "Confirmed riders and driver can coordinate route pickup here.")
                     .font(.system(size: 11))
                     .foregroundColor(AppTheme.placeholderText)
             }
@@ -179,7 +183,9 @@ struct CarpoolChatView: View {
                 .font(.system(size: 18, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
 
-            Text("Say hi to your carpool group! Coordinate pickup spots, arrival times, or any route changes.")
+            Text(isGeneralChat
+                 ? "Send a message to all commuters across campus! Ask about rides, traffic updates, or coordinate carpools."
+                 : "Say hi to your carpool group! Coordinate pickup spots, arrival times, or any route changes.")
                 .font(.system(size: 13))
                 .foregroundColor(AppTheme.placeholderText)
                 .multilineTextAlignment(.center)
@@ -192,9 +198,15 @@ struct CarpoolChatView: View {
                     .foregroundColor(AppTheme.placeholderText)
                     .padding(.top, 8)
 
-                quickPromptButton("👋 Hey everyone! Ready for our commute.")
-                quickPromptButton("📍 I'll be waiting at the main entrance.")
-                quickPromptButton("⏰ Running about 3 minutes late!")
+                if isGeneralChat {
+                    quickPromptButton("👋 Hey everyone! Heading to Innovation Campus today.")
+                    quickPromptButton("🚗 Anyone leaving Tysons around 5:00 PM?")
+                    quickPromptButton("ℹ️ Route 7 traffic is smooth this morning.")
+                } else {
+                    quickPromptButton("👋 Hey everyone! Ready for our commute.")
+                    quickPromptButton("📍 I'll be waiting at the main entrance.")
+                    quickPromptButton("⏰ Running about 3 minutes late!")
+                }
             }
             .padding(.top, 8)
         }
@@ -224,9 +236,10 @@ struct CarpoolChatView: View {
     private var messageInputBar: some View {
         HStack(spacing: 10) {
             HStack(spacing: 8) {
-                TextField("Message carpool...", text: $messageText)
+                TextField(isGeneralChat ? "Message all commuters..." : "Message carpool...", text: $messageText)
                     .font(.system(size: 15))
                     .foregroundColor(AppTheme.textLight)
+                    .tint(.white) // White vertical typing indicator
                     .accentColor(AppTheme.accentBlue)
 
                 if !messageText.isEmpty {
@@ -305,7 +318,6 @@ struct CarpoolChatView: View {
         Task { @MainActor in
             do {
                 let sent = try await rideService.sendMessage(rideId: ride.id, text: textToSend, sender: currentUser)
-                // Add to local list if not already updated via listener
                 if !messages.contains(where: { $0.id == sent.id }) {
                     messages.append(sent)
                 }
@@ -318,7 +330,7 @@ struct CarpoolChatView: View {
     }
 
     private func startObservingMessages() {
-        // Initial fetch
+        // Initial fetch from "messages" collection (same as Android)
         Task { @MainActor in
             do {
                 let fetched = try await rideService.fetchMessages(for: ride.id)
@@ -328,7 +340,7 @@ struct CarpoolChatView: View {
             }
         }
 
-        // Real-time listener
+        // Real-time snapshot listener
         self.listenerCancellation = rideService.observeMessages(for: ride.id) { updatedMessages in
             Task { @MainActor in
                 self.messages = updatedMessages

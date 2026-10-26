@@ -161,6 +161,12 @@ final class MockRideService: RideServiceProtocol {
         }
     }
 
+    func deleteRide(rideId: String) async throws {
+        try await Task.sleep(nanoseconds: 100_000_000)
+        rides.removeAll { $0.id == rideId }
+        requests.removeAll { $0.rideId == rideId }
+    }
+
     // MARK: - Carpool Group Chat (Mock)
     private var chatMessagesByRideId: [String: [CarpoolChatMessage]] = [
         "mock_ride_1": [

@@ -134,4 +134,64 @@ struct CommuteRide: Identifiable, Codable, Equatable {
         self.isUserBooked = false
         self.hasPendingRequest = false
     }
+
+    // MARK: - Departure Parsing & 24-Hour Cancellation Policy
+    var departureDateTime: Date? {
+        let combined = "\(departureDate) \(departureTime)"
+        let formats = [
+            "yyyy-MM-dd h:mm a",
+            "yyyy-MM-dd hh:mm a",
+            "yyyy-MM-dd HH:mm",
+            "yyyy-MM-dd H:mm",
+            "EEE, MMM d h:mm a",
+            "EEE, MMM d hh:mm a",
+            "MMM d, yyyy h:mm a",
+            "MMM d h:mm a",
+            "MM/dd/yyyy h:mm a",
+            "h:mm a"
+        ]
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+
+        for format in formats {
+            df.dateFormat = format
+            if let d = df.date(from: combined) {
+                let cal = Calendar.current
+                var comps = cal.dateComponents([.year, .month, .day, .hour, .minute], from: d)
+                if comps.year == 2000 || comps.year == nil || comps.year == 1970 {
+                    comps.year = cal.component(.year, from: Date())
+                    if let fixed = cal.date(from: comps) {
+                        return fixed
+                    }
+                }
+                return d
+            }
+        }
+
+        // Fallback: match time only for today
+        df.dateFormat = "h:mm a"
+        if let timeOnly = df.date(from: departureTime) {
+            let cal = Calendar.current
+            let timeComps = cal.dateComponents([.hour, .minute], from: timeOnly)
+            if let merged = cal.date(bySettingHour: timeComps.hour ?? 8, minute: timeComps.minute ?? 0, second: 0, of: Date()) {
+                return merged
+            }
+        }
+        return nil
+    }
+
+    /// True if the carpool is scheduled more than 24 hours in the future.
+    /// Rides scheduled in less than 24 hours cannot be cancelled to protect riders.
+    var canBeDeleted: Bool {
+        guard let pickup = departureDateTime else {
+            return true
+        }
+        let interval = pickup.timeIntervalSince(Date())
+        return interval >= (24.0 * 3600.0)
+    }
+
+    var hoursUntilPickup: Double? {
+        guard let pickup = departureDateTime else { return nil }
+        return pickup.timeIntervalSince(Date()) / 3600.0
+    }
 }

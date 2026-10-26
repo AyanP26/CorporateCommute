@@ -4,6 +4,7 @@ struct RideCardView: View {
     let ride: CommuteRide
     var isHost: Bool = false
     var onChat: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
     let onAction: () -> Void
 
     var body: some View {
@@ -181,13 +182,13 @@ struct RideCardView: View {
                 Spacer()
 
                 HStack(spacing: 8) {
-                    // Chat Button
+                    // Chat Button (Matching Android's Ride Chat)
                     if let onChat = onChat {
                         Button(action: onChat) {
                             HStack(spacing: 4) {
                                 Image(systemName: "bubble.left.and.bubble.right.fill")
                                     .font(.system(size: 11))
-                                Text("Chat")
+                                Text("Ride Chat")
                                     .font(.system(size: 12, weight: .bold, design: .rounded))
                             }
                             .foregroundColor(AppTheme.accentBlue)
@@ -202,20 +203,43 @@ struct RideCardView: View {
                         }
                     }
 
-                    // Host Badge or Request Action Button
+                    // Host Actions
                     if isHost {
-                        HStack(spacing: 4) {
-                            Image(systemName: "steeringwheel")
-                                .font(.system(size: 11))
-                            Text("Your Ride")
-                                .font(.system(size: 12, weight: .bold, design: .rounded))
+                        if let onDelete = onDelete {
+                            if ride.canBeDeleted {
+                                Button(action: onDelete) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "trash.fill")
+                                            .font(.system(size: 11))
+                                        Text("Delete")
+                                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    }
+                                    .foregroundColor(AppTheme.errorRed)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 7)
+                                    .background(AppTheme.errorRed.opacity(0.15))
+                                    .cornerRadius(14)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(AppTheme.errorRed.opacity(0.35), lineWidth: 1)
+                                    )
+                                }
+                            } else {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 10))
+                                    Text("Locked (<24h)")
+                                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                }
+                                .foregroundColor(AppTheme.placeholderText.opacity(0.7))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.06))
+                                .clipShape(Capsule())
+                            }
                         }
-                        .foregroundColor(AppTheme.accentBlue)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 7)
-                        .background(Color.white.opacity(0.08))
-                        .cornerRadius(14)
                     } else {
+                        // Commuter Join/Request Button
                         Button(action: onAction) {
                             HStack(spacing: 5) {
                                 if ride.isUserBooked {

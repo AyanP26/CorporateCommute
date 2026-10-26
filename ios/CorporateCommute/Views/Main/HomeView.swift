@@ -7,6 +7,10 @@ struct HomeView: View {
     @State private var showingSettings = false
     @State private var showingLogoutConfirmation = false
 
+    // Carpool Deletion State
+    @State private var rideToDelete: CommuteRide? = nil
+    @State private var showingDeleteConfirmation = false
+
     // Quick Carpool Filters for Find Carpool tab
     @State private var carpoolTimeFilter: String = "All"
     private let carpoolFilters = ["All", "Morning (AM)", "Afternoon (PM)"]
@@ -108,6 +112,19 @@ struct HomeView: View {
                 if let userId = authViewModel.currentUser?.id {
                     dashboardVM.loadRequests(for: userId)
                 }
+            }
+            .confirmationDialog("Cancel Carpool?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                if let r = rideToDelete {
+                    Button("Cancel Carpool", role: .destructive) {
+                        dashboardVM.deleteRide(r)
+                        rideToDelete = nil
+                    }
+                }
+                Button("Keep Carpool", role: .cancel) {
+                    rideToDelete = nil
+                }
+            } message: {
+                Text("Are you sure you want to cancel this carpool? This will notify your colleagues and remove the listing from the schedule.")
             }
             .confirmationDialog("Log Out", isPresented: $showingLogoutConfirmation, titleVisibility: .visible) {
                 Button("Log Out", role: .destructive) {
@@ -247,13 +264,13 @@ struct HomeView: View {
     // MARK: - Tab 0: My Commute (Dashboard)
     private var myCommuteTabContent: some View {
         VStack(spacing: 16) {
-            // Next Commute Card
+            // Next Commute Card (Real data or clean prompt)
             nextCommuteHeroCard
 
             // Job Location & Route Banner (Apple Maps Integrated)
             jobLocationSummaryCard
 
-            // Quick Action Grid (Parity with Android: Post Ride, View Requests, View My Requests, Settings)
+            // Quick Action Grid (Android parity + Cross-platform General Chat)
             VStack(spacing: 12) {
                 HStack(spacing: 12) {
                     quickActionCard(
@@ -266,6 +283,17 @@ struct HomeView: View {
                     }
 
                     quickActionCard(
+                        title: "General Chat",
+                        subtitle: "All company commuters",
+                        icon: "bubble.left.and.bubble.right.fill",
+                        color: AppTheme.accentPurple
+                    ) {
+                        dashboardVM.selectedChatRide = dashboardVM.generalChatRide
+                    }
+                }
+
+                HStack(spacing: 12) {
+                    quickActionCard(
                         title: "Incoming Requests",
                         subtitle: "\(dashboardVM.incomingRequests.filter { $0.status == .pending }.count) pending approval",
                         icon: "tray.and.arrow.down.fill",
@@ -274,9 +302,7 @@ struct HomeView: View {
                     ) {
                         dashboardVM.showingIncomingRequestsSheet = true
                     }
-                }
 
-                HStack(spacing: 12) {
                     quickActionCard(
                         title: "My Sent Requests",
                         subtitle: "\(dashboardVM.mySentRequests.count) carpool requests",
@@ -284,15 +310,6 @@ struct HomeView: View {
                         color: AppTheme.ecoGreen
                     ) {
                         dashboardVM.showingMyRequestsSheet = true
-                    }
-
-                    quickActionCard(
-                        title: "User Settings",
-                        subtitle: "Job & car details",
-                        icon: "slider.horizontal.3",
-                        color: AppTheme.accentBlue.opacity(0.85)
-                    ) {
-                        showingSettings = true
                     }
                 }
             }
@@ -323,7 +340,11 @@ struct HomeView: View {
                             isHost: isHost,
                             onChat: {
                                 dashboardVM.selectedChatRide = ride
-                            }
+                            },
+                            onDelete: isHost ? {
+                                rideToDelete = ride
+                                showingDeleteConfirmation = true
+                            } : nil
                         ) {
                             dashboardVM.cancelBooking(ride, userId: currentUserId)
                         }
@@ -336,113 +357,154 @@ struct HomeView: View {
 
     // MARK: - Next Commute Hero Card
     private var nextCommuteHeroCard: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(AppTheme.ecoGreen)
-                        .frame(width: 8, height: 8)
-                    Text("TODAY'S COMMUTE")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(AppTheme.ecoGreen)
-                }
-                Spacer()
-
-                if let next = dashboardVM.nextRide {
-                    Button(action: {
-                        dashboardVM.selectedChatRide = next
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "bubble.left.and.bubble.right.fill")
-                                .font(.system(size: 11))
-                            Text("Carpool Chat")
+        Group {
+            if let next = dashboardVM.nextRide {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(AppTheme.ecoGreen)
+                                .frame(width: 8, height: 8)
+                            Text("SCHEDULED COMMUTE")
                                 .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(AppTheme.ecoGreen)
                         }
-                        .foregroundColor(AppTheme.accentBlue)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(AppTheme.accentBlueSoft)
-                        .clipShape(Capsule())
-                    }
-                } else {
-                    Text("Confirmed")
-                        .font(.system(size: 12, weight: .bold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(AppTheme.ecoGreenSoft)
-                        .foregroundColor(AppTheme.ecoGreen)
-                        .cornerRadius(8)
-                }
-            }
+                        Spacer()
 
-            HStack(alignment: .top, spacing: 14) {
-                VStack(spacing: 4) {
-                    Circle()
-                        .fill(AppTheme.accentBlue)
-                        .frame(width: 10, height: 10)
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [AppTheme.accentBlue, AppTheme.ecoGreen],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
+                        Button(action: {
+                            dashboardVM.selectedChatRide = next
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
+                                    .font(.system(size: 11))
+                                Text("Ride Chat")
+                                    .font(.system(size: 11, weight: .bold))
+                            }
+                            .foregroundColor(AppTheme.accentBlue)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 4)
+                            .background(AppTheme.accentBlueSoft)
+                            .clipShape(Capsule())
+                        }
+                    }
+
+                    HStack(alignment: .top, spacing: 14) {
+                        VStack(spacing: 4) {
+                            Circle()
+                                .fill(AppTheme.accentBlue)
+                                .frame(width: 10, height: 10)
+                            Rectangle()
+                                .fill(
+                                    LinearGradient(
+                                        colors: [AppTheme.accentBlue, AppTheme.ecoGreen],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .frame(width: 2, height: 32)
+                            Circle()
+                                .fill(AppTheme.ecoGreen)
+                                .frame(width: 10, height: 10)
+                        }
+                        .padding(.top, 4)
+
+                        VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(next.origin)
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(AppTheme.textLight)
+                                Text("Departure \(next.departureTime)")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(AppTheme.placeholderText)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(next.destination)
+                                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                    .foregroundColor(AppTheme.textLight)
+                                    .lineLimit(1)
+                                if !next.departureDate.isEmpty {
+                                    Text("Date: \(next.departureDate)")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(AppTheme.placeholderText)
+                                }
+                            }
+                        }
+                    }
+
+                    Divider()
+                        .background(Color.white.opacity(0.12))
+
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "car.side.fill")
+                                .foregroundColor(AppTheme.accentBlue)
+                            Text(next.vehicleDescription)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(AppTheme.textLight)
+                        }
+                        Spacer()
+                        Text("Driver: \(next.driverName)")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(AppTheme.placeholderText)
+                    }
+                }
+                .padding(18)
+                .background(
+                    RoundedRectangle(cornerRadius: 24)
+                        .fill(AppTheme.cardBackground)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24)
+                                .stroke(AppTheme.accentBlue.opacity(0.4), lineWidth: 1)
                         )
-                        .frame(width: 2, height: 32)
+                )
+            } else {
+                HStack(spacing: 14) {
                     Circle()
-                        .fill(AppTheme.ecoGreen)
-                        .frame(width: 10, height: 10)
-                }
-                .padding(.top, 4)
+                        .fill(AppTheme.accentBlueSoft)
+                        .frame(width: 44, height: 44)
+                        .overlay(
+                            Image(systemName: "car.2.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(AppTheme.accentBlue)
+                        )
 
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(dashboardVM.nextRide?.origin ?? authViewModel.currentUser?.homeLocation?.name ?? "Home")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("No Commute Scheduled Today")
+                            .font(.system(size: 14, weight: .bold, design: .rounded))
                             .foregroundColor(AppTheme.textLight)
-                        Text("Departure \(dashboardVM.nextRide?.departureTime ?? "8:15 AM")")
-                            .font(.system(size: 12))
+
+                        Text("Find colleague rides or offer your own route.")
+                            .font(.system(size: 11))
                             .foregroundColor(AppTheme.placeholderText)
                     }
 
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(dashboardVM.nextRide?.destination ?? authViewModel.currentUser?.workLocation?.name ?? "Corporate HQ")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundColor(AppTheme.textLight)
-                            .lineLimit(1)
-                        Text("Arrival ~ 8:45 AM")
-                            .font(.system(size: 12))
-                            .foregroundColor(AppTheme.placeholderText)
+                    Spacer()
+
+                    Button(action: {
+                        withAnimation {
+                            dashboardVM.selectedTab = 1
+                        }
+                    }) {
+                        Text("Browse")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Capsule().fill(AppTheme.accentBlue))
                     }
                 }
-            }
-
-            Divider()
-                .background(Color.white.opacity(0.12))
-
-            HStack {
-                HStack(spacing: 8) {
-                    Image(systemName: "car.side.fill")
-                        .foregroundColor(AppTheme.accentBlue)
-                    Text(dashboardVM.nextRide?.vehicleDescription ?? "Corporate Carpool")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(AppTheme.textLight)
-                }
-                Spacer()
-                Text("Driver: \(dashboardVM.nextRide?.driverName ?? "You")")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(AppTheme.placeholderText)
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(AppTheme.cardBackground)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(AppTheme.cardBorder, lineWidth: 1)
+                        )
+                )
             }
         }
-        .padding(18)
-        .background(
-            RoundedRectangle(cornerRadius: 24)
-                .fill(AppTheme.cardBackground)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24)
-                        .stroke(AppTheme.accentBlue.opacity(0.4), lineWidth: 1)
-                )
-        )
     }
 
     // MARK: - Job Location Card
@@ -514,7 +576,7 @@ struct HomeView: View {
             Text("No Upcoming Carpool Bookings")
                 .font(.system(size: 16, weight: .bold, design: .rounded))
                 .foregroundColor(AppTheme.textLight)
-            Text("Find open carpools from teammates or offer your own route to start carpooling.")
+            Text("Find open carpools from teammates or offer your own route to start sharing your daily commute.")
                 .font(.system(size: 13))
                 .foregroundColor(AppTheme.placeholderText)
                 .multilineTextAlignment(.center)
@@ -681,8 +743,12 @@ struct HomeView: View {
                     RideCardView(
                         ride: ride,
                         isHost: isHost,
-                        onChat: (ride.isUserBooked || isHost) ? {
+                        onChat: {
                             dashboardVM.selectedChatRide = ride
+                        },
+                        onDelete: isHost ? {
+                            rideToDelete = ride
+                            showingDeleteConfirmation = true
                         } : nil
                     ) {
                         if ride.isUserBooked {
@@ -773,6 +839,10 @@ struct HomeView: View {
                                 isHost: true,
                                 onChat: {
                                     dashboardVM.selectedChatRide = ride
+                                },
+                                onDelete: {
+                                    rideToDelete = ride
+                                    showingDeleteConfirmation = true
                                 }
                             ) {}
                         }

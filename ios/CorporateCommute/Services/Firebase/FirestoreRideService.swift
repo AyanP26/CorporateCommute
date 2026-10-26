@@ -228,40 +228,35 @@ final class FirestoreRideService: RideServiceProtocol {
         #endif
     }
 
-    // MARK: - Carpool Group Chat
+    func deleteRide(rideId: String) async throws {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        try await db.collection("rides").document(rideId).delete()
+
+        // Also clean up any associated ride requests for this ride
+        let reqs = try? await db.collection("ride_requests").whereField("rideId", isEqualTo: rideId).getDocuments()
+        if let docs = reqs?.documents {
+            for doc in docs {
+                try? await doc.reference.delete()
+            }
+        }
+        #endif
+    }
+
+    // MARK: - Carpool Group Chat (Cross-Platform with Android via "messages" collection)
     func fetchMessages(for rideId: String) async throws -> [CarpoolChatMessage] {
         #if canImport(FirebaseFirestore)
         let db = Firestore.firestore()
-        let snapshot = try await db.collection("rides")
-            .document(rideId)
-            .collection("messages")
-            .order(by: "timestamp", descending: false)
+        let snapshot = try await db.collection("messages")
+            .whereField("rideId", isEqualTo: rideId)
             .getDocuments()
 
-        return snapshot.documents.compactMap { doc -> CarpoolChatMessage? in
-            let data = doc.data()
-            let senderId = data["senderId"] as? String ?? ""
-            let senderName = data["senderName"] as? String ?? "Colleague"
-            let senderEmail = data["senderEmail"] as? String ?? ""
-            let text = data["text"] as? String ?? ""
-            let ts: Date
-            if let firestoreTs = data["timestamp"] as? Timestamp {
-                ts = firestoreTs.dateValue()
-            } else if let seconds = data["timestamp"] as? Double {
-                ts = Date(timeIntervalSince1970: seconds)
-            } else {
-                ts = Date()
-            }
-            return CarpoolChatMessage(
-                id: doc.documentID,
-                rideId: rideId,
-                senderId: senderId,
-                senderName: senderName,
-                senderEmail: senderEmail,
-                text: text,
-                timestamp: ts
-            )
+        var messages = snapshot.documents.compactMap { doc -> CarpoolChatMessage? in
+            return CarpoolChatMessage(dictionary: doc.data(), documentId: doc.documentID)
         }
+        // In-memory sort by timestamp (avoids composite index requirement, matches Android)
+        messages.sort { $0.timestamp < $1.timestamp }
+        return messages
         #else
         return []
         #endif
@@ -270,19 +265,9 @@ final class FirestoreRideService: RideServiceProtocol {
     func sendMessage(rideId: String, text: String, sender: User) async throws -> CarpoolChatMessage {
         #if canImport(FirebaseFirestore)
         let db = Firestore.firestore()
-        let msgRef = db.collection("rides").document(rideId).collection("messages").document()
+        let msgRef = db.collection("messages").document()
         let now = Date()
-        let data: [String: Any] = [
-            "id": msgRef.documentID,
-            "rideId": rideId,
-            "senderId": sender.id,
-            "senderName": sender.name,
-            "senderEmail": sender.email,
-            "text": text,
-            "timestamp": Timestamp(date: now)
-        ]
-        try await msgRef.setData(data)
-        return CarpoolChatMessage(
+        let newMsg = CarpoolChatMessage(
             id: msgRef.documentID,
             rideId: rideId,
             senderId: sender.id,
@@ -292,6 +277,8 @@ final class FirestoreRideService: RideServiceProtocol {
             timestamp: now,
             isCurrentUser: true
         )
+        try await msgRef.setData(newMsg.dictionaryRepresentation)
+        return newMsg
         #else
         return CarpoolChatMessage(rideId: rideId, senderId: sender.id, senderName: sender.name, text: text, isCurrentUser: true)
         #endif
@@ -300,36 +287,14 @@ final class FirestoreRideService: RideServiceProtocol {
     func observeMessages(for rideId: String, onUpdate: @escaping ([CarpoolChatMessage]) -> Void) -> (() -> Void)? {
         #if canImport(FirebaseFirestore)
         let db = Firestore.firestore()
-        let listener = db.collection("rides")
-            .document(rideId)
-            .collection("messages")
-            .order(by: "timestamp", descending: false)
+        let listener = db.collection("messages")
+            .whereField("rideId", isEqualTo: rideId)
             .addSnapshotListener { snapshot, error in
                 guard let documents = snapshot?.documents, error == nil else { return }
-                let messages = documents.compactMap { doc -> CarpoolChatMessage? in
-                    let data = doc.data()
-                    let senderId = data["senderId"] as? String ?? ""
-                    let senderName = data["senderName"] as? String ?? "Colleague"
-                    let senderEmail = data["senderEmail"] as? String ?? ""
-                    let text = data["text"] as? String ?? ""
-                    let ts: Date
-                    if let firestoreTs = data["timestamp"] as? Timestamp {
-                        ts = firestoreTs.dateValue()
-                    } else if let seconds = data["timestamp"] as? Double {
-                        ts = Date(timeIntervalSince1970: seconds)
-                    } else {
-                        ts = Date()
-                    }
-                    return CarpoolChatMessage(
-                        id: doc.documentID,
-                        rideId: rideId,
-                        senderId: senderId,
-                        senderName: senderName,
-                        senderEmail: senderEmail,
-                        text: text,
-                        timestamp: ts
-                    )
+                var messages = documents.compactMap { doc -> CarpoolChatMessage? in
+                    return CarpoolChatMessage(dictionary: doc.data(), documentId: doc.documentID)
                 }
+                messages.sort { $0.timestamp < $1.timestamp }
                 onUpdate(messages)
             }
         return {

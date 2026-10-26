@@ -236,6 +236,53 @@ final class CommuteDashboardViewModel: ObservableObject {
         }
     }
 
+    func deleteRide(_ ride: CommuteRide, completion: ((Bool, String) -> Void)? = nil) {
+        guard ride.canBeDeleted else {
+            let msg = "Cannot cancel carpool: pickup is scheduled in less than 24 hours."
+            self.requestAlertMessage = msg
+            self.showRequestBanner = true
+            completion?(false, msg)
+            return
+        }
+
+        Task { @MainActor in
+            do {
+                try await rideService.deleteRide(rideId: ride.id)
+                self.availableRides.removeAll { $0.id == ride.id }
+                if self.nextRide?.id == ride.id {
+                    self.nextRide = self.availableRides.first(where: { $0.isUserBooked })
+                }
+                let msg = "Carpool successfully cancelled."
+                self.requestAlertMessage = msg
+                self.showRequestBanner = true
+                completion?(true, msg)
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    self.showRequestBanner = false
+                }
+            } catch {
+                let err = "Failed to cancel carpool: \(error.localizedDescription)"
+                self.requestAlertMessage = err
+                self.showRequestBanner = true
+                completion?(false, err)
+            }
+        }
+    }
+
+    // General Commuter Chat ride model representation for cross-platform chat with Android
+    var generalChatRide: CommuteRide {
+        CommuteRide(
+            id: "general_commuter_chat",
+            driverId: "general_channel",
+            driverName: "Company Network",
+            origin: "General Commuter Chat",
+            destination: "All Campuses",
+            departureDate: "Today",
+            departureTime: "Live",
+            availableSeats: 0
+        )
+    }
+
     func cancelBooking(_ ride: CommuteRide, userId: String) {
         Task { @MainActor in
             do {
