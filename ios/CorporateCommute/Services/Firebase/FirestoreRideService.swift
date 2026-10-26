@@ -175,10 +175,18 @@ final class FirestoreRideService: RideServiceProtocol {
             return RideRequest(dictionary: data, documentId: doc.documentID)
         }
 
-        if driverId.isEmpty || driverId == "mock_driver_1" || driverId == "driver1" {
-            return requests.filter { $0.driverId == "mock_driver_1" || $0.driverId == "driver1" || $0.driverId.isEmpty || $0.driverId == driverId }
+        // Return all requests that could be for this driver
+        // (including driverId == "current_user", "driver1", mock, empty, or matching driverId)
+        return requests.filter { req in
+            if !driverId.isEmpty && req.passengerId == driverId {
+                // Sent by the driver themselves, not an incoming request to them
+                return false
+            }
+            if driverId.isEmpty || driverId == "mock_driver_1" || driverId == "driver1" || driverId == "current_user" {
+                return true
+            }
+            return req.driverId == driverId || req.driverId == "current_user" || req.driverId == "driver1" || req.driverId == "mock_driver_1" || req.driverId.isEmpty
         }
-        return requests.filter { $0.driverId == driverId }
         #else
         return []
         #endif
@@ -210,21 +218,64 @@ final class FirestoreRideService: RideServiceProtocol {
         let reqRef = db.collection("ride_requests").document(requestId)
         try await reqRef.updateData(["status": status.rawValue])
 
-        // If accepted, update ride's available seats
+        // If accepted, update ride's available seats and passenger list
         if status == .accepted {
             let doc = try await reqRef.getDocument()
+            let passengerId = doc.data()?["passengerId"] as? String ?? ""
             if let rideId = doc.data()?["rideId"] as? String, !rideId.isEmpty {
-                let rideRef = db.collection("rides").document(rideId)
-                try await db.runTransaction { transaction, errorPointer in
-                    guard let rideDoc = try? transaction.getDocument(rideRef),
-                          let seats = rideDoc.data()?["availableSeats"] as? Int, seats > 0 else {
-                        return nil
+                let directRef = db.collection("rides").document(rideId)
+                let directDoc = try? await directRef.getDocument()
+                let targetRef: DocumentReference?
+                let currentDoc: DocumentSnapshot?
+
+                if let directDoc = directDoc, directDoc.exists {
+                    targetRef = directRef
+                    currentDoc = directDoc
+                } else {
+                    let query = try? await db.collection("rides").whereField("rideId", isEqualTo: rideId).getDocuments()
+                    if let firstDoc = query?.documents.first {
+                        targetRef = firstDoc.reference
+                        currentDoc = firstDoc
+                    } else {
+                        targetRef = nil
+                        currentDoc = nil
                     }
-                    transaction.updateData(["availableSeats": seats - 1], forDocument: rideRef)
-                    return nil
+                }
+
+                if let targetRef = targetRef, let currentDoc = currentDoc {
+                    var updatePayload: [String: Any] = [:]
+                    if let seats = (currentDoc.data()?["availableSeats"] as? NSNumber)?.intValue, seats > 0 {
+                        updatePayload["availableSeats"] = seats - 1
+                    }
+                    if !passengerId.isEmpty {
+                        updatePayload["passengerIds"] = FieldValue.arrayUnion([passengerId])
+                    }
+                    if !updatePayload.isEmpty {
+                        try? await targetRef.updateData(updatePayload)
+                    }
                 }
             }
         }
+        #endif
+    }
+
+    func observeRequests(onUpdate: @escaping ([RideRequest]) -> Void) -> (() -> Void)? {
+        #if canImport(FirebaseFirestore)
+        let db = Firestore.firestore()
+        let listener = db.collection("ride_requests").addSnapshotListener { snapshot, error in
+            guard let documents = snapshot?.documents else { return }
+            let requests = documents.compactMap { doc -> RideRequest? in
+                var data = doc.data()
+                data["requestId"] = doc.documentID
+                return RideRequest(dictionary: data, documentId: doc.documentID)
+            }
+            onUpdate(requests)
+        }
+        return {
+            listener.remove()
+        }
+        #else
+        return nil
         #endif
     }
 

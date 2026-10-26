@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Combine
 
 final class CommuteDashboardViewModel: ObservableObject {
@@ -44,6 +45,7 @@ final class CommuteDashboardViewModel: ObservableObject {
 
     private let rideService: RideServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+    private var requestsListenerCancellation: (() -> Void)? = nil
 
     // MARK: - Formatters
     static let timeFormatter: DateFormatter = {
@@ -82,17 +84,41 @@ final class CommuteDashboardViewModel: ObservableObject {
         loadInitialRides()
     }
 
+    deinit {
+        requestsListenerCancellation?()
+    }
+
+    func pendingRequests(for rideId: String) -> [RideRequest] {
+        incomingRequests.filter { $0.rideId == rideId && $0.status == .pending }
+    }
+
     func loadRequests(for userId: String) {
+        if requestsListenerCancellation == nil {
+            requestsListenerCancellation = rideService.observeRequests { [weak self] allRequests in
+                guard let self = self else { return }
+                DispatchQueue.main.async {
+                    self.processRequests(allRequests, for: userId)
+                }
+            }
+        }
+
         Task { @MainActor in
             do {
                 async let incoming = rideService.fetchIncomingRequests(for: userId)
                 async let mySent = rideService.fetchMySentRequests(for: userId)
                 let (inc, sent) = try await (incoming, mySent)
-                self.incomingRequests = inc
+                
+                let hostedRideIds = Set(self.ridesHostedBy(userId: userId).map { $0.id })
+                self.incomingRequests = inc.filter { req in
+                    let isForMyRide = hostedRideIds.contains(req.rideId)
+                    let isMyDriverId = req.driverId == userId || req.driverId == "current_user" || req.driverId == "driver1" || req.driverId == "mock_driver_1" || req.driverId.isEmpty
+                    let notSentByMe = req.passengerId.isEmpty || req.passengerId != userId
+                    return (isForMyRide || isMyDriverId) && notSentByMe
+                }
+                
                 self.mySentRequests = sent
                 self.requestedRideIds = Set(sent.map { $0.rideId })
 
-                // Update hasPendingRequest on availableRides
                 for index in 0..<self.availableRides.count {
                     let rId = self.availableRides[index].id
                     self.availableRides[index].hasPendingRequest = self.requestedRideIds.contains(rId)
@@ -100,6 +126,27 @@ final class CommuteDashboardViewModel: ObservableObject {
             } catch {
                 print("[CommuteDashboardViewModel] Load requests error: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func processRequests(_ allRequests: [RideRequest], for userId: String) {
+        let hostedRideIds = Set(self.ridesHostedBy(userId: userId).map { $0.id })
+        
+        self.incomingRequests = allRequests.filter { req in
+            let isForMyRide = hostedRideIds.contains(req.rideId)
+            let isMyDriverId = req.driverId == userId || req.driverId == "current_user" || req.driverId == "driver1" || req.driverId == "mock_driver_1" || req.driverId.isEmpty
+            let notSentByMe = req.passengerId.isEmpty || req.passengerId != userId
+            return (isForMyRide || isMyDriverId) && notSentByMe
+        }
+
+        self.mySentRequests = allRequests.filter { req in
+            !req.passengerId.isEmpty && req.passengerId == userId
+        }
+        self.requestedRideIds = Set(self.mySentRequests.map { $0.rideId })
+
+        for index in 0..<self.availableRides.count {
+            let rId = self.availableRides[index].id
+            self.availableRides[index].hasPendingRequest = self.requestedRideIds.contains(rId)
         }
     }
 
@@ -137,8 +184,14 @@ final class CommuteDashboardViewModel: ObservableObject {
                 if let rideIdx = self.availableRides.firstIndex(where: { $0.id == request.rideId }), self.availableRides[rideIdx].availableSeats > 0 {
                     self.availableRides[rideIdx].availableSeats -= 1
                 }
+                self.requestAlertMessage = "Accepted \(request.passengerName)'s request! Seat reserved."
+                withAnimation { self.showRequestBanner = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    withAnimation { self.showRequestBanner = false }
+                }
             } catch {
-                print("[CommuteDashboardViewModel] Accept error: \(error.localizedDescription)")
+                self.requestAlertMessage = "Failed to accept request: \(error.localizedDescription)"
+                withAnimation { self.showRequestBanner = true }
             }
         }
     }
@@ -150,8 +203,14 @@ final class CommuteDashboardViewModel: ObservableObject {
                 if let idx = self.incomingRequests.firstIndex(where: { $0.requestId == request.requestId }) {
                     self.incomingRequests[idx].status = .declined
                 }
+                self.requestAlertMessage = "Declined request from \(request.passengerName)."
+                withAnimation { self.showRequestBanner = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    withAnimation { self.showRequestBanner = false }
+                }
             } catch {
-                print("[CommuteDashboardViewModel] Decline error: \(error.localizedDescription)")
+                self.requestAlertMessage = "Failed to decline: \(error.localizedDescription)"
+                withAnimation { self.showRequestBanner = true }
             }
         }
     }

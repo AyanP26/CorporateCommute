@@ -3,8 +3,11 @@ import SwiftUI
 struct RideCardView: View {
     let ride: CommuteRide
     var isHost: Bool = false
+    var pendingRequests: [RideRequest] = []
     var onChat: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
+    var onAcceptRequest: ((RideRequest) -> Void)? = nil
+    var onDeclineRequest: ((RideRequest) -> Void)? = nil
     let onAction: () -> Void
 
     var body: some View {
@@ -175,6 +178,108 @@ struct RideCardView: View {
                 .padding(.vertical, 6)
                 .background(Color.black.opacity(0.2))
                 .cornerRadius(8)
+            }
+
+            // Incoming Pending Requests Section (for Host)
+            if isHost && !pendingRequests.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bell.badge.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color.orange)
+                        Text("Rider Requests (\(pendingRequests.count))")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(AppTheme.textLight)
+                        Spacer()
+                    }
+
+                    ForEach(pendingRequests) { req in
+                        HStack(spacing: 10) {
+                            Circle()
+                                .fill(LinearGradient(
+                                    colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .frame(width: 34, height: 34)
+                                .overlay(
+                                    Text(String(req.passengerName.prefix(1)).uppercased())
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                )
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(req.passengerName)
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundColor(AppTheme.textLight)
+                                    .lineLimit(1)
+
+                                Text(req.passengerEmail)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(AppTheme.placeholderText)
+                                    .lineLimit(1)
+                            }
+
+                            Spacer(minLength: 6)
+
+                            // Accept button
+                            if let onAccept = onAcceptRequest {
+                                Button(action: {
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    onAccept(req)
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 10, weight: .bold))
+                                        Text("Accept")
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(AppTheme.ecoGreen)
+                                    .clipShape(Capsule())
+                                    .shadow(color: AppTheme.ecoGreen.opacity(0.3), radius: 4)
+                                }
+                                .fixedSize()
+                            }
+
+                            // Decline button
+                            if let onDecline = onDeclineRequest {
+                                Button(action: {
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    onDecline(req)
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(AppTheme.errorRed)
+                                        .padding(7)
+                                        .background(AppTheme.errorRed.opacity(0.15))
+                                        .clipShape(Circle())
+                                }
+                                .fixedSize()
+                            }
+                        }
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.black.opacity(0.28))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                    }
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.orange.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.orange.opacity(0.25), lineWidth: 1)
+                        )
+                )
             }
 
             // Footer: Vehicle info & Action Buttons

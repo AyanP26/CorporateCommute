@@ -2,7 +2,21 @@ import SwiftUI
 
 struct ManageRequestsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authViewModel: AuthViewModel
     @ObservedObject var dashboardVM: CommuteDashboardViewModel
+
+    @State private var filterIndex: Int = 0 // 0: Pending, 1: All
+
+    private var currentUserId: String {
+        authViewModel.currentUser?.id ?? "current_user"
+    }
+
+    private var filteredRequests: [RideRequest] {
+        if filterIndex == 0 {
+            return dashboardVM.incomingRequests.filter { $0.status == .pending }
+        }
+        return dashboardVM.incomingRequests
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,18 +30,26 @@ struct ManageRequestsView: View {
                         .padding(.top, 16)
                         .padding(.bottom, 12)
 
+                    // Sub-filter tabs
+                    filterTabs
+                        .padding(.horizontal, AppTheme.horizontalPadding)
+                        .padding(.bottom, 14)
+
                     ScrollView(showsIndicators: false) {
                         VStack(spacing: 16) {
-                            if dashboardVM.incomingRequests.isEmpty {
+                            if filteredRequests.isEmpty {
                                 emptyStateCard
                             } else {
-                                ForEach(dashboardVM.incomingRequests) { request in
+                                ForEach(filteredRequests) { request in
                                     incomingRequestCard(request)
                                 }
                             }
                         }
                         .padding(.horizontal, AppTheme.horizontalPadding)
                         .padding(.bottom, 32)
+                    }
+                    .refreshable {
+                        dashboardVM.loadRequests(for: currentUserId)
                     }
                 }
             }
@@ -44,6 +66,47 @@ struct ManageRequestsView: View {
                     }
                 }
             }
+            .onAppear {
+                dashboardVM.loadRequests(for: currentUserId)
+            }
+        }
+    }
+
+    // MARK: - Filter Tabs
+    private var filterTabs: some View {
+        let pendingCount = dashboardVM.incomingRequests.filter { $0.status == .pending }.count
+        let totalCount = dashboardVM.incomingRequests.count
+
+        return HStack(spacing: 8) {
+            filterButton(title: "Pending (\(pendingCount))", index: 0)
+            filterButton(title: "All (\(totalCount))", index: 1)
+        }
+        .padding(4)
+        .background(Color.black.opacity(0.35))
+        .cornerRadius(AppTheme.pillCornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+    }
+
+    private func filterButton(title: String, index: Int) -> some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.25)) {
+                filterIndex = index
+            }
+        }) {
+            Text(title)
+                .font(.system(size: 13, weight: filterIndex == index ? .bold : .medium))
+                .foregroundColor(filterIndex == index ? .white : AppTheme.placeholderText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: AppTheme.pillCornerRadius)
+                        .fill(filterIndex == index ? AppTheme.accentBlue : Color.clear)
+                )
         }
     }
 

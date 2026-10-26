@@ -2,7 +2,12 @@ import SwiftUI
 
 struct MyRequestsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authViewModel: AuthViewModel
     @ObservedObject var dashboardVM: CommuteDashboardViewModel
+
+    private var currentUserId: String {
+        authViewModel.currentUser?.id ?? "current_user"
+    }
 
     var body: some View {
         NavigationStack {
@@ -29,6 +34,9 @@ struct MyRequestsView: View {
                         .padding(.horizontal, AppTheme.horizontalPadding)
                         .padding(.bottom, 32)
                     }
+                    .refreshable {
+                        dashboardVM.loadRequests(for: currentUserId)
+                    }
                 }
             }
             .navigationBarBackButtonHidden(true)
@@ -43,6 +51,9 @@ struct MyRequestsView: View {
                             .clipShape(Circle())
                     }
                 }
+            }
+            .onAppear {
+                dashboardVM.loadRequests(for: currentUserId)
             }
         }
     }

@@ -77,9 +77,11 @@ struct HomeView: View {
             }
             .sheet(isPresented: $dashboardVM.showingIncomingRequestsSheet) {
                 ManageRequestsView(dashboardVM: dashboardVM)
+                    .environmentObject(authViewModel)
             }
             .sheet(isPresented: $dashboardVM.showingMyRequestsSheet) {
                 MyRequestsView(dashboardVM: dashboardVM)
+                    .environmentObject(authViewModel)
             }
             .sheet(item: $dashboardVM.selectedChatRide) { ride in
                 CarpoolChatView(
@@ -109,9 +111,12 @@ struct HomeView: View {
                 }
             }
             .onAppear {
-                if let userId = authViewModel.currentUser?.id {
-                    dashboardVM.loadRequests(for: userId)
-                }
+                let uid = authViewModel.currentUser?.id ?? "current_user"
+                dashboardVM.loadRequests(for: uid)
+            }
+            .onChange(of: authViewModel.currentUser?.id) { _, newId in
+                let uid = newId ?? "current_user"
+                dashboardVM.loadRequests(for: uid)
             }
             .confirmationDialog("Cancel Carpool?", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
                 if let r = rideToDelete {
@@ -336,16 +341,24 @@ struct HomeView: View {
                     emptyBookingsCard
                 } else {
                     ForEach(dashboardVM.bookedRides) { ride in
-                        let isHost = ride.driverId == currentUserId
+                        let isHost = ride.driverId == currentUserId || ride.driverId == "current_user"
+                        let pendingForRide = isHost ? dashboardVM.pendingRequests(for: ride.id) : []
                         RideCardView(
                             ride: ride,
                             isHost: isHost,
+                            pendingRequests: pendingForRide,
                             onChat: {
                                 dashboardVM.selectedChatRide = ride
                             },
                             onDelete: isHost ? {
                                 rideToDelete = ride
                                 showingDeleteConfirmation = true
+                            } : nil,
+                            onAcceptRequest: isHost ? { req in
+                                dashboardVM.acceptRequest(req)
+                            } : nil,
+                            onDeclineRequest: isHost ? { req in
+                                dashboardVM.declineRequest(req)
                             } : nil
                         ) {
                             dashboardVM.cancelBooking(ride, userId: currentUserId)
@@ -842,15 +855,23 @@ struct HomeView: View {
                         }
                     } else {
                         ForEach(hostedRides) { ride in
+                            let pendingForRide = dashboardVM.pendingRequests(for: ride.id)
                             RideCardView(
                                 ride: ride,
                                 isHost: true,
+                                pendingRequests: pendingForRide,
                                 onChat: {
                                     dashboardVM.selectedChatRide = ride
                                 },
                                 onDelete: {
                                     rideToDelete = ride
                                     showingDeleteConfirmation = true
+                                },
+                                onAcceptRequest: { req in
+                                    dashboardVM.acceptRequest(req)
+                                },
+                                onDeclineRequest: { req in
+                                    dashboardVM.declineRequest(req)
                                 }
                             ) {}
                         }

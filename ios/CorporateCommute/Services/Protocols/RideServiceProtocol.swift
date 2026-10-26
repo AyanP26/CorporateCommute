@@ -15,6 +15,7 @@ protocol RideServiceProtocol: AnyObject {
     func fetchIncomingRequests(for driverId: String) async throws -> [RideRequest]
     func fetchMySentRequests(for passengerId: String) async throws -> [RideRequest]
     func updateRequestStatus(requestId: String, status: RideRequestStatus) async throws
+    func observeRequests(onUpdate: @escaping ([RideRequest]) -> Void) -> (() -> Void)?
 
     // Carpool Group Chat
     func fetchMessages(for rideId: String) async throws -> [CarpoolChatMessage]

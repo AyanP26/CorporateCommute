@@ -1,5 +1,9 @@
 import Foundation
 
+#if canImport(FirebaseFirestore)
+import FirebaseFirestore
+#endif
+
 enum RideRequestStatus: String, Codable {
     case pending = "PENDING"
     case accepted = "ACCEPTED"
@@ -58,16 +62,16 @@ struct RideRequest: Identifiable, Codable, Equatable {
             "passengerEmail": passengerEmail,
             "route": route,
             "status": status.rawValue,
-            "timestamp": timestamp.timeIntervalSince1970 * 1000
+            "timestamp": Int64(timestamp.timeIntervalSince1970 * 1000)
         ]
     }
 
     init?(dictionary: [String: Any], documentId: String? = nil) {
         let reqId = (dictionary["requestId"] as? String) ?? documentId ?? UUID().uuidString
-        guard let rideId = dictionary["rideId"] as? String,
-              let driverId = dictionary["driverId"] as? String else {
+        guard let rideId = dictionary["rideId"] as? String else {
             return nil
         }
+        let driverId = (dictionary["driverId"] as? String) ?? ""
 
         self.requestId = reqId
         self.rideId = rideId
@@ -75,17 +79,39 @@ struct RideRequest: Identifiable, Codable, Equatable {
         self.passengerId = dictionary["passengerId"] as? String ?? ""
         self.passengerName = dictionary["passengerName"] as? String ?? "Colleague"
         self.passengerEmail = dictionary["passengerEmail"] as? String ?? ""
-        self.route = dictionary["route"] as? String ?? "Commute Route"
 
-        let statusString = dictionary["status"] as? String ?? "PENDING"
+        let rawRoute = dictionary["route"] as? String ?? "Commute Route"
+        self.route = rawRoute.replacingOccurrences(of: "null ->", with: "Pickup ->")
+
+        let statusString = (dictionary["status"] as? String)?.uppercased() ?? "PENDING"
         self.status = RideRequestStatus(rawValue: statusString) ?? .pending
 
-        if let millis = dictionary["timestamp"] as? Double {
+        #if canImport(FirebaseFirestore)
+        if let ts = dictionary["timestamp"] as? Timestamp {
+            self.timestamp = ts.dateValue()
+        } else if let num = dictionary["timestamp"] as? NSNumber {
+            self.timestamp = Date(timeIntervalSince1970: num.doubleValue / 1000.0)
+        } else if let millis = dictionary["timestamp"] as? Double {
             self.timestamp = Date(timeIntervalSince1970: millis / 1000.0)
         } else if let millis = dictionary["timestamp"] as? Int64 {
+            self.timestamp = Date(timeIntervalSince1970: Double(millis) / 1000.0)
+        } else if let millis = dictionary["timestamp"] as? Int {
             self.timestamp = Date(timeIntervalSince1970: Double(millis) / 1000.0)
         } else {
             self.timestamp = Date()
         }
+        #else
+        if let num = dictionary["timestamp"] as? NSNumber {
+            self.timestamp = Date(timeIntervalSince1970: num.doubleValue / 1000.0)
+        } else if let millis = dictionary["timestamp"] as? Double {
+            self.timestamp = Date(timeIntervalSince1970: millis / 1000.0)
+        } else if let millis = dictionary["timestamp"] as? Int64 {
+            self.timestamp = Date(timeIntervalSince1970: Double(millis) / 1000.0)
+        } else if let millis = dictionary["timestamp"] as? Int {
+            self.timestamp = Date(timeIntervalSince1970: Double(millis) / 1000.0)
+        } else {
+            self.timestamp = Date()
+        }
+        #endif
     }
 }

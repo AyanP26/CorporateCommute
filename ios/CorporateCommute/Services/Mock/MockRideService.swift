@@ -161,6 +161,11 @@ final class MockRideService: RideServiceProtocol {
         }
     }
 
+    func observeRequests(onUpdate: @escaping ([RideRequest]) -> Void) -> (() -> Void)? {
+        onUpdate(requests)
+        return nil
+    }
+
     func deleteRide(rideId: String) async throws {
         try await Task.sleep(nanoseconds: 100_000_000)
         rides.removeAll { $0.id == rideId }
