@@ -21,7 +21,7 @@
             android:paddingBottom="32dp">
 
             <ImageView
-                android:id="@+id/ivCheckmark"
+                android:id="@+id/ivCar"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:layout_marginTop="32dp"
@@ -42,7 +42,7 @@
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/ivCheckmark"
+                app:layout_constraintTop_toBottomOf="@+id/ivCar"
                 tools:text="Welcome, Commuter!" />
 
             <TextView

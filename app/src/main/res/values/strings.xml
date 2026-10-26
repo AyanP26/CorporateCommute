@@ -38,4 +38,10 @@
     <string name="seats_format">%1$d Seats</string>
     <string name="route_format">%1$s  ➔  %2$s</string>
     <string name="date_time_format">Date: %1$s  |  Time: %2$s</string>
+
+    <!-- Request Join Strings -->
+    <string name="request_join_button">Request to Join</string>
+    <string name="request_sent">Request Sent</string>
+    <string name="your_ride">Your Listed Ride</string>
+    <string name="request_success_toast">Ride request sent to driver!</string>
 </resources>

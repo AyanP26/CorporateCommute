@@ -4,18 +4,23 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.corporatecommute.models.Ride;
+import com.example.corporatecommute.models.RideRequest;
+import com.example.corporatecommute.models.User;
 import com.example.corporatecommute.viewmodels.AuthViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -45,10 +50,14 @@ public class HomeActivity extends AppCompatActivity {
         rideAdapter = new RideAdapter();
         rvRides.setAdapter(rideAdapter);
 
+        rideAdapter.setListener(this::handleRideRequest);
+
         authViewModel.getCurrentUserData(user -> {
             if (user != null) {
                 tvWelcomeUser.setText(getString(R.string.welcome_user_format, user.getName()));
                 tvUserEmail.setText(user.getEmail());
+                rideAdapter.setCurrentUserId(user.getId());
+                fetchUserRideRequests(user.getId());
             } else {
                 tvWelcomeUser.setText(R.string.welcome_default);
                 tvUserEmail.setText("");
@@ -73,6 +82,64 @@ public class HomeActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         loadRidesFromFirestore();
+        User currentUser = authViewModel.getCurrentUser();
+        if (currentUser != null && currentUser.getId() != null) {
+            fetchUserRideRequests(currentUser.getId());
+        }
+    }
+
+    private void fetchUserRideRequests(String passengerId) {
+        if (passengerId == null || passengerId.isEmpty()) return;
+
+        db.collection("ride_requests")
+            .whereEqualTo("passengerId", passengerId)
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                Set<String> requestedRideIds = new HashSet<>();
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    String rideId = doc.getString("rideId");
+                    if (rideId != null) {
+                        requestedRideIds.add(rideId);
+                    }
+                }
+                rideAdapter.setRequestedRideIds(requestedRideIds);
+            });
+    }
+
+    private void handleRideRequest(Ride ride) {
+        User currentUser = authViewModel.getCurrentUser();
+        if (currentUser == null) {
+            Toast.makeText(this, "Please log in to request a ride.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String passengerId = currentUser.getId() != null ? currentUser.getId() : "";
+        String passengerName = currentUser.getName() != null ? currentUser.getName() : "Commuter";
+        String passengerEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "";
+        String route = ride.getPickupLocation() + " -> " + ride.getDestination();
+
+        RideRequest request = new RideRequest(
+            null,
+            ride.getRideId(),
+            ride.getDriverId(),
+            passengerId,
+            passengerName,
+            passengerEmail,
+            route,
+            "PENDING",
+            System.currentTimeMillis()
+        );
+
+        db.collection("ride_requests")
+            .add(request)
+            .addOnSuccessListener(docRef -> {
+                docRef.update("requestId", docRef.getId());
+                rideAdapter.markRideRequested(ride.getRideId());
+                Toast.makeText(this, R.string.request_success_toast, Toast.LENGTH_SHORT).show();
+            })
+            .addOnFailureListener(e ->
+                Toast.makeText(this, "Failed to send request: " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show()
+            );
     }
 
     private void loadRidesFromFirestore() {
