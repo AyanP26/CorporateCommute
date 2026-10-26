@@ -59,8 +59,8 @@
     <string name="back_button">Back</string>
 
     <!-- Messaging Strings -->
-    <string name="messaging_title">general commuter chat</string>
+    <string name="messaging_title">General Chat</string>
     <string name="hint_message">Type a message...</string>
     <string name="send_button">Send</string>
-    <string name="chat_button">general commuter chat</string>
+    <string name="chat_button">General Chat</string>
 </resources>
