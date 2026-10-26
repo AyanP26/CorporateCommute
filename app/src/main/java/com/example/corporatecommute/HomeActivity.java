@@ -54,6 +54,13 @@ public class HomeActivity extends AppCompatActivity {
         rvRides.setAdapter(rideAdapter);
 
         rideAdapter.setListener(this::handleRideRequest);
+        rideAdapter.setChatListener(ride -> {
+            Intent intent = new Intent(HomeActivity.this, MessagingActivity.class);
+            String rideId = ride.getRideId() != null ? ride.getRideId() : ride.getPickupLocation();
+            intent.putExtra("RIDE_ID", rideId);
+            intent.putExtra("RIDE_TITLE", ride.getPickupLocation() + " ➔ " + ride.getDestination());
+            startActivity(intent);
+        });
 
         authViewModel.getCurrentUserData(user -> {
             if (user != null) {
@@ -84,6 +91,8 @@ public class HomeActivity extends AppCompatActivity {
 
         btnChat.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, MessagingActivity.class);
+            intent.putExtra("RIDE_ID", "general_commuter_chat");
+            intent.putExtra("RIDE_TITLE", "General Commuter Chat");
             startActivity(intent);
         });
 

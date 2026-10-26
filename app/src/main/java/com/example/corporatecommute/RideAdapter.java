@@ -21,13 +21,22 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         void onRequestJoin(Ride ride);
     }
 
+    public interface OnChatClickListener {
+        void onOpenChat(Ride ride);
+    }
+
     private List<Ride> rideList = new ArrayList<>();
     private final Set<String> requestedRideIds = new HashSet<>();
     private String currentUserId = "";
     private OnRideRequestListener requestListener;
+    private OnChatClickListener chatListener;
 
     public void setListener(OnRideRequestListener listener) {
         this.requestListener = listener;
+    }
+
+    public void setChatListener(OnChatClickListener chatListener) {
+        this.chatListener = chatListener;
     }
 
     public void setCurrentUserId(String userId) {
@@ -67,7 +76,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         Ride ride = rideList.get(position);
         boolean isDriver = currentUserId.equals(ride.getDriverId());
         boolean isRequested = requestedRideIds.contains(ride.getRideId());
-        holder.bind(ride, isDriver, isRequested, requestListener);
+        holder.bind(ride, isDriver, isRequested, requestListener, chatListener);
     }
 
     @Override
@@ -77,7 +86,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
     public static class RideViewHolder extends RecyclerView.ViewHolder {
         private final TextView tvDriverName, tvSeats, tvRoute, tvDateTime, tvNotes;
-        private final MaterialButton btnRequestJoin;
+        private final MaterialButton btnRequestJoin, btnOpenChat;
 
         public RideViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,9 +96,11 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             tvDateTime = itemView.findViewById(R.id.tvDateTime);
             tvNotes = itemView.findViewById(R.id.tvNotes);
             btnRequestJoin = itemView.findViewById(R.id.btnRequestJoin);
+            btnOpenChat = itemView.findViewById(R.id.btnOpenChat);
         }
 
-        public void bind(Ride ride, boolean isDriver, boolean isRequested, OnRideRequestListener listener) {
+        public void bind(Ride ride, boolean isDriver, boolean isRequested,
+                         OnRideRequestListener listener, OnChatClickListener chatListener) {
             String driverName = ride.getDriverName() != null ? ride.getDriverName() : "Commuter";
             tvDriverName.setText(driverName);
 
@@ -122,6 +133,12 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
                     }
                 });
             }
+
+            btnOpenChat.setOnClickListener(v -> {
+                if (chatListener != null) {
+                    chatListener.onOpenChat(ride);
+                }
+            });
         }
     }
 }

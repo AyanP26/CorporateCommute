@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private String messageId;
+    private String rideId;
     private String senderId;
     private String senderName;
     private String senderEmail;
@@ -12,8 +13,9 @@ public class Message implements Serializable {
 
     public Message() {}
 
-    public Message(String messageId, String senderId, String senderName, String senderEmail, String text, long timestamp) {
+    public Message(String messageId, String rideId, String senderId, String senderName, String senderEmail, String text, long timestamp) {
         this.messageId = messageId;
+        this.rideId = rideId;
         this.senderId = senderId;
         this.senderName = senderName;
         this.senderEmail = senderEmail;
@@ -27,6 +29,14 @@ public class Message implements Serializable {
 
     public void setMessageId(String messageId) {
         this.messageId = messageId;
+    }
+
+    public String getRideId() {
+        return rideId;
+    }
+
+    public void setRideId(String rideId) {
+        this.rideId = rideId;
     }
 
     public String getSenderId() {

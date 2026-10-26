@@ -2,6 +2,7 @@ package com.example.corporatecommute;
 
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -25,11 +26,26 @@ public class MessagingActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private FirebaseFirestore db;
     private AuthViewModel authViewModel;
+    private String rideId = "general";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
+
+        if (getIntent() != null) {
+            String passedRideId = getIntent().getStringExtra("RIDE_ID");
+            if (passedRideId != null && !passedRideId.isEmpty()) {
+                rideId = passedRideId;
+            }
+            String rideTitle = getIntent().getStringExtra("RIDE_TITLE");
+            if (rideTitle != null && !rideTitle.isEmpty()) {
+                TextView tvTitle = findViewById(R.id.tvTitle);
+                if (tvTitle != null) {
+                    tvTitle.setText(rideTitle);
+                }
+            }
+        }
 
         db = FirebaseFirestore.getInstance();
         authViewModel = AuthViewModel.getInstance();
@@ -64,6 +80,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         Message msg = new Message(
             null,
+            rideId,
             senderId,
             senderName,
             senderEmail,
@@ -84,6 +101,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private void listenToMessages() {
         db.collection("messages")
+            .whereEqualTo("rideId", rideId)
             .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener((value, error) -> {
                 if (error != null || value == null) return;
