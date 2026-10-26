@@ -63,4 +63,5 @@
     <string name="hint_message">Type a message...</string>
     <string name="send_button">Send</string>
     <string name="chat_button">General Chat</string>
+    <string name="ride_chat_button">Ride Chat</string>
 </resources>
