@@ -92,7 +92,7 @@ public class HomeActivity extends AppCompatActivity {
         btnChat.setOnClickListener(v -> {
             Intent intent = new Intent(HomeActivity.this, MessagingActivity.class);
             intent.putExtra("RIDE_ID", "general_commuter_chat");
-            intent.putExtra("RIDE_TITLE", "General Commuter Chat");
+            intent.putExtra("RIDE_TITLE", "general commuter chat");
             startActivity(intent);
         });
 
