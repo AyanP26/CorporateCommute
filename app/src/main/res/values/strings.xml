@@ -50,5 +50,10 @@
     <string name="no_requests_found">No pending ride requests from passengers yet.</string>
     <string name="accept_button">Accept</string>
     <string name="decline_button">Decline</string>
-    <string name="view_requests_button">View Ride Requests</string>
+    <string name="view_requests_button">View Incoming Requests</string>
+
+    <!-- My Requests Strings -->
+    <string name="my_requests_title">My Ride Requests</string>
+    <string name="no_my_requests">You haven\'t requested to join any rides yet.</string>
+    <string name="view_my_requests_button">My Sent Requests</string>
 </resources>

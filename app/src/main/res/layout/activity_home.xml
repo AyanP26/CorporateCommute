@@ -97,14 +97,31 @@
                 android:layout_width="0dp"
                 android:layout_height="52dp"
                 android:layout_marginTop="12dp"
+                android:layout_marginEnd="6dp"
                 android:text="@string/view_requests_button"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="15sp"
+                android:textSize="13sp"
+                app:backgroundTint="@color/button_purple"
+                app:cornerRadius="26dp"
+                app:layout_constraintEnd_toStartOf="@id/btnViewMyRequests"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/btnPostRide" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewMyRequests"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="12dp"
+                android:text="@string/view_my_requests_button"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="13sp"
                 app:backgroundTint="@color/button_purple"
                 app:cornerRadius="26dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btnViewRequests"
                 app:layout_constraintTop_toBottomOf="@id/btnPostRide" />
 
             <!-- Rides Section -->
