@@ -14,9 +14,9 @@ import com.example.corporatecommute.viewmodels.AuthViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MessagingActivity extends AppCompatActivity {
@@ -26,26 +26,12 @@ public class MessagingActivity extends AppCompatActivity {
     private MessageAdapter messageAdapter;
     private FirebaseFirestore db;
     private AuthViewModel authViewModel;
-    private String rideId = "general";
+    private String rideId = "general_commuter_chat";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
-
-        if (getIntent() != null) {
-            String passedRideId = getIntent().getStringExtra("RIDE_ID");
-            if (passedRideId != null && !passedRideId.isEmpty()) {
-                rideId = passedRideId;
-            }
-            String rideTitle = getIntent().getStringExtra("RIDE_TITLE");
-            if (rideTitle != null && !rideTitle.isEmpty()) {
-                TextView tvTitle = findViewById(R.id.tvTitle);
-                if (tvTitle != null) {
-                    tvTitle.setText(rideTitle);
-                }
-            }
-        }
 
         db = FirebaseFirestore.getInstance();
         authViewModel = AuthViewModel.getInstance();
@@ -54,6 +40,24 @@ public class MessagingActivity extends AppCompatActivity {
         MaterialButton btnSend = findViewById(R.id.btnSend);
         etMessage = findViewById(R.id.etMessage);
         rvMessages = findViewById(R.id.rvMessages);
+        TextView tvTitle = findViewById(R.id.tvTitle);
+
+        if (getIntent() != null) {
+            String passedRideId = getIntent().getStringExtra("RIDE_ID");
+            if (passedRideId != null && !passedRideId.isEmpty()) {
+                rideId = passedRideId;
+            }
+            String rideTitle = getIntent().getStringExtra("RIDE_TITLE");
+            if (rideTitle != null && !rideTitle.isEmpty()) {
+                if (tvTitle != null) {
+                    tvTitle.setText(rideTitle);
+                }
+            } else {
+                if (tvTitle != null) {
+                    tvTitle.setText("General Chat");
+                }
+            }
+        }
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -102,7 +106,6 @@ public class MessagingActivity extends AppCompatActivity {
     private void listenToMessages() {
         db.collection("messages")
             .whereEqualTo("rideId", rideId)
-            .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener((value, error) -> {
                 if (error != null || value == null) return;
 
@@ -114,6 +117,10 @@ public class MessagingActivity extends AppCompatActivity {
                         messages.add(msg);
                     }
                 }
+
+                // Sort messages by timestamp locally in memory to avoid Firestore composite index errors
+                Collections.sort(messages, (m1, m2) -> Long.compare(m1.getTimestamp(), m2.getTimestamp()));
+
                 messageAdapter.setMessages(messages);
                 if (!messages.isEmpty()) {
                     rvMessages.smoothScrollToPosition(messages.size() - 1);
