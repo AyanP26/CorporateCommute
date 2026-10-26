@@ -58,7 +58,7 @@ public class HomeActivity extends AppCompatActivity {
             Intent intent = new Intent(HomeActivity.this, MessagingActivity.class);
             String rideId = ride.getRideId() != null ? ride.getRideId() : ride.getPickupLocation();
             intent.putExtra("RIDE_ID", rideId);
-            intent.putExtra("RIDE_TITLE", "Ride Chat");
+            intent.putExtra("RIDE_TITLE", ride.getPickupLocation() + " ➔ " + ride.getDestination());
             startActivity(intent);
         });
 
