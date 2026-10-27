@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_main_gradient"
+    android:paddingHorizontal="20dp"
+    tools:context=".MessagingActivity">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="52dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/back_button"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:backgroundTint="@color/button_purple"
+        app:cornerRadius="26dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="16dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        tools:text="General Chat" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@id/layoutInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        tools:itemCount="4"
+        tools:listitem="@layout/item_message" />
+
+    <LinearLayout
+        android:id="@+id/layoutInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:autofillHints="message"
+            android:background="@drawable/bg_input_field"
+            android:hint="@string/hint_message"
+            android:inputType="text"
+            android:paddingHorizontal="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="#D1D1D1"
+            android:textSize="15sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSend"
+            android:layout_width="wrap_content"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:text="@string/send_button"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            app:backgroundTint="@color/button_purple"
+            app:cornerRadius="26dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

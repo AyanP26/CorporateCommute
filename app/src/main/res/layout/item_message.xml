@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:orientation="vertical"
+    android:paddingHorizontal="8dp">
+
+    <TextView
+        android:id="@+id/tvSender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#D1D1D1"
+        android:textSize="12sp"
+        tools:text="Alex Morgan" />
+
+    <TextView
+        android:id="@+id/tvMessageText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/bg_dashboard_card"
+        android:maxWidth="280dp"
+        android:padding="12dp"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        tools:text="Hey everyone, looking to carpool tomorrow morning!" />
+
+</LinearLayout>

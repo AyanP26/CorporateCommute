@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">Corporate Commute</string>
+    <string name="welcome_title">Welcome to Corporate\nCommute!</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="welcome_user_format">Welcome, %1$s!</string>
+    <string name="welcome_default">Welcome, Commuter!</string>
+    <string name="login_button">Login</string>
+    <string name="logging_in">Logging in...</string>
+    <string name="create_account_button">Create an Account</string>
+    <string name="create_account_title">Create an Account</string>
+    <string name="submitting">Submitting...</string>
+    <string name="hint_name">Name</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_phone">Phone Number</string>
+    <string name="submit_button">Submit</string>
+    <string name="error_registration">Please fill in all fields with valid information (password min 6 characters).</string>
+    <string name="error_login">Please enter a valid email and password.</string>
+    <string name="dashboard_title">Your Commute Dashboard</string>
+    <string name="dashboard_desc">You\'re all set up with Corporate Commute. Rideshare schedules, vehicle pooling, and company routes will appear here.</string>
+    <string name="logout_button">Log Out</string>
+
+    <!-- Post a Ride & Rides List Strings -->
+    <string name="create_ride_title">Post a Ride</string>
+    <string name="hint_pickup">Pickup Location (e.g. Reston)</string>
+    <string name="hint_destination">Destination (e.g. HQ / Tysons)</string>
+    <string name="hint_date">Departure Date (YYYY-MM-DD)</string>
+    <string name="hint_time">Departure Time (e.g. 08:30 AM)</string>
+    <string name="hint_seats">Available Seats (e.g. 3)</string>
+    <string name="hint_notes">Notes / Guidelines (optional)</string>
+    <string name="post_ride_button">Post Ride</string>
+    <string name="posting_ride">Posting Ride...</string>
+    <string name="error_create_ride">Please fill in pickup, destination, date, time, and seats.</string>
+    <string name="ride_posted_success">Ride successfully posted!</string>
+
+    <string name="available_rides_title">Available Commute Rides</string>
+    <string name="no_rides_found">No rides found. Post a ride to get started!</string>
+    <string name="seats_format">%1$d Seats</string>
+    <string name="route_format">%1$s  ➔  %2$s</string>
+    <string name="date_time_format">Date: %1$s  |  Time: %2$s</string>
+
+    <!-- Request Join Strings -->
+    <string name="request_join_button">Request to Join</string>
+    <string name="request_sent">Request Sent</string>
+    <string name="your_ride">Your Listed Ride</string>
+    <string name="request_success_toast">Ride request sent to driver!</string>
+
+    <!-- Manage Requests Strings -->
+    <string name="manage_requests_title">Ride Requests &amp; Invites</string>
+    <string name="no_requests_found">No pending ride requests from passengers yet.</string>
+    <string name="accept_button">Accept</string>
+    <string name="decline_button">Decline</string>
+    <string name="view_requests_button">View Incoming Requests</string>
+
+    <!-- My Requests Strings -->
+    <string name="my_requests_title">My Ride Requests</string>
+    <string name="no_my_requests">You haven\'t requested to join any rides yet.</string>
+    <string name="view_my_requests_button">My Sent Requests</string>
+    <string name="back_button">Back</string>
+
+    <!-- Messaging Strings -->
+    <string name="messaging_title">General Chat</string>
+    <string name="hint_message">Type a message...</string>
+    <string name="send_button">Send</string>
+    <string name="chat_button">General Chat</string>
+    <string name="ride_chat_button">Ride Chat</string>
+</resources>

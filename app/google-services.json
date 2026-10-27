@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "521071784154",
+    "project_id": "corporatecommute-81b92",
+    "storage_bucket": "corporatecommute-81b92.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521071784154:android:cb4aabdcad5df90ca975e3",
+        "android_client_info": {
+          "package_name": "a.b.m"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzbO2-Bu3RBimBtprPXlEZKKfM44ys6Ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521071784154:android:6466d4b6ec493ccea975e3",
+        "android_client_info": {
+          "package_name": "com.example.corporatecommute"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzbO2-Bu3RBimBtprPXlEZKKfM44ys6Ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

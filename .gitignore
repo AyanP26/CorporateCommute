@@ -38,3 +38,12 @@ Package.pins
 *.log
 *.swp
 *~
+.gradle/
+build/
+app/build/
+.idea/caches/
+.idea/libraries/
+.idea/workspace.xml
+*.iml
+.DS_Store
+local.properties
