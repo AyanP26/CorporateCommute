@@ -1,0 +1,415 @@
+import SwiftUI
+
+struct RideCardView: View {
+    let ride: CommuteRide
+    var isHost: Bool = false
+    var pendingRequests: [RideRequest] = []
+    var onChat: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
+    var onAcceptRequest: ((RideRequest) -> Void)? = nil
+    var onDeclineRequest: ((RideRequest) -> Void)? = nil
+    let onAction: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            // Header: Driver info & Department badge
+            HStack(alignment: .center) {
+                HStack(spacing: 12) {
+                    Circle()
+                        .fill(LinearGradient(
+                            colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ))
+                        .frame(width: 42, height: 42)
+                        .overlay(
+                            Text(String(ride.driverName.prefix(1)).uppercased())
+                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .foregroundColor(.white)
+                        )
+                        .shadow(color: AppTheme.accentBlue.opacity(0.3), radius: 6)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(ride.driverName)
+                                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                                .foregroundColor(AppTheme.textLight)
+                                .lineLimit(1)
+
+                            if isHost {
+                                Text("HOST")
+                                    .font(.system(size: 9, weight: .black))
+                                    .foregroundColor(AppTheme.accentBlue)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(AppTheme.accentBlueSoft)
+                                    .clipShape(Capsule())
+                                    .lineLimit(1)
+                            }
+                        }
+
+                        Text(ride.driverDepartment)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(AppTheme.placeholderText)
+                            .lineLimit(1)
+                    }
+                }
+
+                Spacer()
+
+                // Seats badge
+                HStack(spacing: 4) {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 11))
+                    Text(ride.availableSeats > 0 ? "\(ride.availableSeats) left" : "Full")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .lineLimit(1)
+                }
+                .foregroundColor(ride.availableSeats > 0 ? AppTheme.ecoGreen : AppTheme.placeholderText)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(
+                    Capsule()
+                        .fill(ride.availableSeats > 0 ? AppTheme.ecoGreenSoft : Color.white.opacity(0.06))
+                        .overlay(
+                            Capsule().stroke(
+                                ride.availableSeats > 0 ? AppTheme.ecoGreen.opacity(0.3) : Color.clear,
+                                lineWidth: 1
+                            )
+                        )
+                )
+            }
+
+            Divider()
+                .background(Color.white.opacity(0.1))
+
+            // Route timeline
+            HStack(alignment: .top, spacing: 12) {
+                VStack(spacing: 4) {
+                    Circle()
+                        .fill(AppTheme.accentBlue)
+                        .frame(width: 9, height: 9)
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(width: 2, height: 24)
+                    Circle()
+                        .fill(AppTheme.ecoGreen)
+                        .frame(width: 9, height: 9)
+                }
+                .padding(.top, 4)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("PICKUP")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(AppTheme.accentBlue)
+                                .lineLimit(1)
+                            Text(ride.origin)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(AppTheme.textLight)
+                                .lineLimit(1)
+                        }
+
+                        Spacer(minLength: 8)
+
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(ride.departureTime)
+                                .font(.system(size: 13, weight: .bold, design: .rounded))
+                                .foregroundColor(AppTheme.accentBlue)
+                                .lineLimit(1)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(AppTheme.accentBlueSoft)
+                                .cornerRadius(8)
+
+                            if !ride.departureDate.isEmpty {
+                                Text(ride.departureDate)
+                                    .font(.system(size: 10))
+                                    .foregroundColor(AppTheme.placeholderText)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("DROP-OFF")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundColor(AppTheme.ecoGreen)
+                                .lineLimit(1)
+                            Text(ride.destination)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(AppTheme.textLight.opacity(0.95))
+                                .lineLimit(1)
+                        }
+
+                        Spacer(minLength: 8)
+
+                        if let retTime = ride.returnTime {
+                            Text("Return: \(retTime)")
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(AppTheme.placeholderText)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+            }
+
+            // Optional Notes
+            if !ride.notes.isEmpty {
+                HStack(spacing: 6) {
+                    Image(systemName: "note.text")
+                        .font(.system(size: 11))
+                        .foregroundColor(AppTheme.placeholderText)
+                    Text(ride.notes)
+                        .font(.system(size: 12))
+                        .foregroundColor(AppTheme.placeholderText.opacity(0.9))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(Color.black.opacity(0.2))
+                .cornerRadius(8)
+            }
+
+            // Incoming Pending Requests Section (for Host)
+            if isHost && !pendingRequests.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bell.badge.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color.orange)
+                        Text("Rider Requests (\(pendingRequests.count))")
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(AppTheme.textLight)
+                        Spacer()
+                    }
+
+                    ForEach(pendingRequests) { req in
+                        HStack(spacing: 10) {
+                            Circle()
+                                .fill(LinearGradient(
+                                    colors: [AppTheme.accentBlue, AppTheme.bgBottomLeft],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ))
+                                .frame(width: 34, height: 34)
+                                .overlay(
+                                    Text(String(req.passengerName.prefix(1)).uppercased())
+                                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                                        .foregroundColor(.white)
+                                )
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(req.passengerName)
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundColor(AppTheme.textLight)
+                                    .lineLimit(1)
+
+                                Text(req.passengerEmail)
+                                    .font(.system(size: 11))
+                                    .foregroundColor(AppTheme.placeholderText)
+                                    .lineLimit(1)
+                            }
+
+                            Spacer(minLength: 6)
+
+                            // Accept button
+                            if let onAccept = onAcceptRequest {
+                                Button(action: {
+                                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                                    onAccept(req)
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 10, weight: .bold))
+                                        Text("Accept")
+                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(AppTheme.ecoGreen)
+                                    .clipShape(Capsule())
+                                    .shadow(color: AppTheme.ecoGreen.opacity(0.3), radius: 4)
+                                }
+                                .fixedSize()
+                            }
+
+                            // Decline button
+                            if let onDecline = onDeclineRequest {
+                                Button(action: {
+                                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                    onDecline(req)
+                                }) {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundColor(AppTheme.errorRed)
+                                        .padding(7)
+                                        .background(AppTheme.errorRed.opacity(0.15))
+                                        .clipShape(Circle())
+                                }
+                                .fixedSize()
+                            }
+                        }
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.black.opacity(0.28))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+                                )
+                        )
+                    }
+                }
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color.orange.opacity(0.08))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.orange.opacity(0.25), lineWidth: 1)
+                        )
+                )
+            }
+
+            // Footer: Vehicle info & Action Buttons
+            HStack(alignment: .center) {
+                HStack(spacing: 6) {
+                    Image(systemName: "car.side.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(AppTheme.placeholderText)
+                    Text(ride.vehicleDescription)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AppTheme.placeholderText)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
+
+                Spacer(minLength: 8)
+
+                HStack(spacing: 8) {
+                    // Chat Button
+                    if let onChat = onChat {
+                        Button(action: onChat) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "bubble.left.and.bubble.right.fill")
+                                    .font(.system(size: 11))
+                                Text("Chat")
+                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                    .lineLimit(1)
+                            }
+                            .foregroundColor(AppTheme.accentBlue)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 7)
+                            .background(AppTheme.accentBlueSoft)
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(AppTheme.accentBlue.opacity(0.3), lineWidth: 1)
+                            )
+                        }
+                        .fixedSize()
+                    }
+
+                    // Host Actions
+                    if isHost {
+                        if let onDelete = onDelete {
+                            if ride.canBeDeleted {
+                                Button(action: onDelete) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "trash.fill")
+                                            .font(.system(size: 11))
+                                        Text("Delete")
+                                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                                            .lineLimit(1)
+                                    }
+                                    .foregroundColor(AppTheme.errorRed)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 7)
+                                    .background(AppTheme.errorRed.opacity(0.15))
+                                    .cornerRadius(14)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(AppTheme.errorRed.opacity(0.35), lineWidth: 1)
+                                    )
+                                }
+                                .fixedSize()
+                            } else {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lock.fill")
+                                        .font(.system(size: 10))
+                                    Text("Locked")
+                                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                        .lineLimit(1)
+                                }
+                                .foregroundColor(AppTheme.placeholderText.opacity(0.7))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.06))
+                                .clipShape(Capsule())
+                                .fixedSize()
+                            }
+                        }
+                    } else {
+                        // Commuter Join/Request Button
+                        Button(action: onAction) {
+                            HStack(spacing: 5) {
+                                if ride.isUserBooked {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 11, weight: .bold))
+                                    Text("Reserved")
+                                        .lineLimit(1)
+                                } else if ride.hasPendingRequest {
+                                    Image(systemName: "hourglass")
+                                        .font(.system(size: 11))
+                                    Text("Requested")
+                                        .lineLimit(1)
+                                } else {
+                                    Image(systemName: "paperplane.fill")
+                                        .font(.system(size: 11))
+                                    Text("Request Join")
+                                        .lineLimit(1)
+                                }
+                            }
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 7)
+                            .background(
+                                ride.isUserBooked ?
+                                    AppTheme.accentBlue :
+                                    (ride.hasPendingRequest ? Color.orange.opacity(0.85) : AppTheme.buttonPurple)
+                            )
+                            .cornerRadius(14)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(Color.white.opacity(ride.isUserBooked ? 0.3 : 0.15), lineWidth: 1)
+                            )
+                        }
+                        .fixedSize()
+                        .disabled(ride.availableSeats == 0 && !ride.isUserBooked && !ride.hasPendingRequest)
+                    }
+                }
+            }
+        }
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 22)
+                .fill(AppTheme.cardBackground)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22)
+                        .stroke(AppTheme.cardBorder, lineWidth: 1)
+                )
+        )
+    }
+}

@@ -1,1 +1,40 @@
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Android & IDE
+.idea/
+*.iml
+.gradle/
+build/
+app/
+local.properties
+captures/
+*.hprof
+
+# Xcode & iOS
+xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserdatad
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+.swiftpm/
+Package.resolved
+
+# CocoaPods & SPM
+Pods/
+Podfile.lock
+Packages/
+Package.pins
+
+# Temporary / Cache
+*.tmp
+*.log
+*.swp
+*~
